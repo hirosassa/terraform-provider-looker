@@ -57,6 +57,7 @@ func Provider() *schema.Provider {
 			"looker_role":             resourceRole(),
 			"looker_role_groups":      resourceRoleGroups(),
 			"looker_user_attribute":   resourceUserAttribute(),
+			"looker_connection":       resourceConnection(),
 		},
 
 		ConfigureFunc: providerConfigure,
