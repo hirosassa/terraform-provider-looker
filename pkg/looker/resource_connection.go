@@ -35,7 +35,7 @@ func resourceConnection() *schema.Resource {
 				Optional: true,
 				Default:  "443",
 			},
-			"user_name": {
+			"username": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
