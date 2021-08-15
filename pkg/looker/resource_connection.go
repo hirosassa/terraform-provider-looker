@@ -289,7 +289,7 @@ func expandWriteDBConnection(d *schema.ResourceData) *apiclient.WriteDBConnectio
 	database := d.Get("database").(string)
 	dbTimezone := d.Get("db_timezone").(string)
 	queryTimezone := d.Get("query_timezone").(string)
-	schema := d.Get("schema").(string)
+	schemaString := d.Get("schema").(string)
 	maxConnections := d.Get("max_connctions").(int64)
 	maxBillingGigabytes := d.Get("max_billing_gigabytes").(string)
 	ssl := d.Get("ssl").(bool)
@@ -319,7 +319,7 @@ func expandWriteDBConnection(d *schema.ResourceData) *apiclient.WriteDBConnectio
 		Database:                 &database,
 		DbTimezone:               &dbTimezone,
 		QueryTimezone:            &queryTimezone,
-		Schema:                   &schema,
+		Schema:                   &schemaString,
 		MaxConnections:           &maxConnections,
 		MaxBillingGigabytes:      &maxBillingGigabytes,
 		Ssl:                      &ssl,

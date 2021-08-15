@@ -50,7 +50,7 @@ resource "looker_connection" "snowflake_connection" {
 - **dialect_name** (String)
 - **host** (String)
 - **name** (String)
-- **user_name** (String)
+- **username** (String)
 
 ### Optional
 
