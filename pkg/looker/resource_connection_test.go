@@ -34,11 +34,25 @@ func TestAcc_Connection(t *testing.T) {
 
 func connectionConfig(name string) string {
 	return fmt.Sprintf(`
+	locals {
+		gcp_service_account_email = "test@testproject.iam.gserviceaccount.com"
+		gcp_service_account_json = <<EOT{
+  "type": "service_account",
+  "project_id": "testproject",
+  "private_key_id": "dummydummydummydummydummydummydummy",
+  "private_key": "dummydummydummydummydummydummydummydummydummy",
+  "client_email": "test@testproject.iam.gserviceaccount.com",
+  "client_id": "1234567890123456789012345678901234567890",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/robot/v1/metadata/x509/test@testproject.iam.gserviceaccount.com"
+}
+EOT
+	}
 	resource "looker_connection" "test" {
 		name = %s
-		host = "test_project"
-		user = var.gcp_service_account_email
-		certificate = var.gcp_service_account_json
+		host = "testproject"
+		user = locals.gcp_service_account_email
+		certificate = locals.gcp_service_account_json
 		file_type = ".json"
 		database = "test_dataset"
 		tmp_db_name = "tmp_test_dataset"
