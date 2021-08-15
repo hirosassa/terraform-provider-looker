@@ -279,37 +279,66 @@ func resourceConnectionImport(d *schema.ResourceData, m interface{}) ([]*schema.
 }
 
 func expandWriteDBConnection(d *schema.ResourceData) *apiclient.WriteDBConnection {
+	name := d.Get("name").(string)
+	host := d.Get("host").(string)
+	port := d.Get("port").(int64)
+	username := d.Get("username").(string)
+	password := d.Get("password").(string)
+	certificate := d.Get("certificate").(string)
+	fileType := d.Get("file_type").(string)
+	database := d.Get("database").(string)
+	dbTimezone := d.Get("db_timezone").(string)
+	queryTimezone := d.Get("query_timezone").(string)
+	schema := d.Get("schema").(string)
+	maxConnections := d.Get("max_connctions").(int64)
+	maxBillingGigabytes := d.Get("max_billing_gigabytes").(string)
+	ssl := d.Get("ssl").(bool)
+	verifySsl := d.Get("verify_ssl").(bool)
+	tmpDbName := d.Get("tmp_db_name").(string)
+	jdbcAdditionalParams := d.Get("jdbc_additional_params").(string)
+	poolTimeout := d.Get("pool_timeout").(int64)
+	dialectName := d.Get("dialect_name").(string)
+	userDbCredentials := d.Get("user_db_credentials").(bool)
+	maintenanceCron := d.Get("maintenance_cron").(string)
+	sqlRunnerPrecacheTables := d.Get("sql_runner_precache_tables").(bool)
+	sqlWritingWithInfoSchema := d.Get("sql_writing_with_info_schema").(bool)
+	afterConnectStatements := d.Get("after_connect_statements").(string)
+	tunnelId := d.Get("tunnel_id").(string)
+	pdtConcurrency := d.Get("pdt_concurrency").(int64)
+	disable_context_comment := d.Get("disable_context_comment").(bool)
+	oauthApplicationId := d.Get("oauth_application_id").(int64)
+
 	writeDBConnection := &apiclient.WriteDBConnection{
-		Name:                     d.Get("name").(*string),
-		Host:                     d.Get("host").(*string),
-		Port:                     d.Get("port").(*int64),
-		Username:                 d.Get("username").(*string),
-		Password:                 d.Get("password").(*string),
-		Certificate:              d.Get("certificate").(*string),
-		FileType:                 d.Get("file_type").(*string),
-		Database:                 d.Get("database").(*string),
-		DbTimezone:               d.Get("db_timezone").(*string),
-		QueryTimezone:            d.Get("query_timezone").(*string),
-		Schema:                   d.Get("schema").(*string),
-		MaxConnections:           d.Get("max_connctions").(*int64),
-		MaxBillingGigabytes:      d.Get("max_billing_gigabytes").(*string),
-		Ssl:                      d.Get("ssl").(*bool),
-		VerifySsl:                d.Get("verify_ssl").(*bool),
-		TmpDbName:                d.Get("tmp_db_name").(*string),
-		JdbcAdditionalParams:     d.Get("jdbc_additional_params").(*string),
-		PoolTimeout:              d.Get("pool_timeout").(*int64),
-		DialectName:              d.Get("dialect_name").(*string),
-		UserDbCredentials:        d.Get("user_db_credentials").(*bool),
+		Name:                     &name,
+		Host:                     &host,
+		Port:                     &port,
+		Username:                 &username,
+		Password:                 &password,
+		Certificate:              &certificate,
+		FileType:                 &fileType,
+		Database:                 &database,
+		DbTimezone:               &dbTimezone,
+		QueryTimezone:            &queryTimezone,
+		Schema:                   &schema,
+		MaxConnections:           &maxConnections,
+		MaxBillingGigabytes:      &maxBillingGigabytes,
+		Ssl:                      &ssl,
+		VerifySsl:                &verifySsl,
+		TmpDbName:                &tmpDbName,
+		JdbcAdditionalParams:     &jdbcAdditionalParams,
+		PoolTimeout:              &poolTimeout,
+		DialectName:              &dialectName,
+		UserDbCredentials:        &userDbCredentials,
 		UserAttributeFields:      nil,
-		MaintenanceCron:          d.Get("maintenance_cron").(*string),
-		SqlRunnerPrecacheTables:  d.Get("sql_runner_precache_tables").(*bool),
-		SqlWritingWithInfoSchema: d.Get("sql_writing_with_info_schema").(*bool),
-		AfterConnectStatements:   d.Get("after_connect_statements").(*string),
+		MaintenanceCron:          &maintenanceCron,
+		SqlRunnerPrecacheTables:  &sqlRunnerPrecacheTables,
+		SqlWritingWithInfoSchema: &sqlWritingWithInfoSchema,
+		AfterConnectStatements:   &afterConnectStatements,
 		PdtContextOverride:       nil,
-		TunnelId:                 d.Get("tunnel_id").(*string),
-		PdtConcurrency:           d.Get("pdt_concurrency").(*int64),
-		DisableContextComment:    d.Get("disable_context_comment").(*bool),
-		OauthApplicationId:       d.Get("oauth_application_id").(*int64),
+		TunnelId:                 &tunnelId,
+		PdtConcurrency:           &pdtConcurrency,
+		DisableContextComment:    &disable_context_comment,
+		OauthApplicationId:       &oauthApplicationId,
 	}
 
 	userAttributeFields := expandStringListFromSet(d.Get("user_attribute_fields").(*schema.Set))
