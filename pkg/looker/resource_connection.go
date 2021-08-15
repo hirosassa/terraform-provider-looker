@@ -431,7 +431,7 @@ func flattenConnection(connection apiclient.DBConnection, d *schema.ResourceData
 		return err
 	}
 	if connection.PdtContextOverride != nil {
-		d.Set("pdt_context_override", []map[string]interface{}{
+		if err := d.Set("pdt_context_override", []map[string]interface{}{
 			{
 				"context":                  *connection.PdtContextOverride.Context,
 				"host":                     *connection.PdtContextOverride.Host,
@@ -445,7 +445,9 @@ func flattenConnection(connection apiclient.DBConnection, d *schema.ResourceData
 				"jdbc_additional_params":   *connection.PdtContextOverride.JdbcAdditionalParams,
 				"after_connect_statements": *connection.PdtContextOverride.AfterConnectStatements,
 			},
-		})
+		}); err != nil {
+			return err
+		}
 	}
 	if err := d.Set("tunnel_id", connection.TunnelId); err != nil {
 		return err
