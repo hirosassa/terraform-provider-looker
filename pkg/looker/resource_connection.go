@@ -1,6 +1,7 @@
 package looker
 
 import (
+	"log"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -31,9 +32,8 @@ func resourceConnection() *schema.Resource {
 				Required: true,
 			},
 			"port": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Optional: true,
-				Default:  "443",
 			},
 			"username": {
 				Type:     schema.TypeString,
@@ -52,9 +52,10 @@ func resourceConnection() *schema.Resource {
 				Sensitive: true,
 			},
 			"file_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{".json", ".p12"}, false),
 			},
 			"database": {
 				Type:     schema.TypeString,
@@ -76,19 +77,17 @@ func resourceConnection() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
-			"max_billing_gigabyte": {
+			"max_billing_gigabytes": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"ssl": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  true,
 			},
 			"verify_ssl": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  true,
 			},
 			"tmp_db_name": {
 				Type:     schema.TypeString,
@@ -203,7 +202,6 @@ func resourceConnection() *schema.Resource {
 			"disable_context_comment": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
 			},
 			"oauth_application_id": {
 				Type:     schema.TypeInt,
@@ -216,10 +214,14 @@ func resourceConnection() *schema.Resource {
 func resourceConnectionCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*apiclient.LookerSDK)
 
-	body := expandWriteDBConnection(d)
+	body, err := expandWriteDBConnection(d)
+	if err != nil {
+		return err
+	}
 
 	result, err := client.CreateConnection(*body, nil)
 	if err != nil {
+		log.Printf("[ERROR] %v", err)
 		return err
 	}
 
@@ -248,9 +250,12 @@ func resourceConnectionUpdate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*apiclient.LookerSDK)
 
 	name := d.Get("name").(string)
-	body := expandWriteDBConnection(d)
+	body, err := expandWriteDBConnection(d)
+	if err != nil {
+		return err
+	}
 
-	_, err := client.UpdateConnection(name, *body, nil)
+	_, err = client.UpdateConnection(name, *body, nil)
 	if err != nil {
 		return err
 	}
@@ -278,67 +283,114 @@ func resourceConnectionImport(d *schema.ResourceData, m interface{}) ([]*schema.
 	return []*schema.ResourceData{d}, nil
 }
 
-func expandWriteDBConnection(d *schema.ResourceData) *apiclient.WriteDBConnection {
+func expandWriteDBConnection(d *schema.ResourceData) (*apiclient.WriteDBConnection, error) {
+	// required values
 	name := d.Get("name").(string)
 	host := d.Get("host").(string)
-	port := d.Get("port").(int64)
 	username := d.Get("username").(string)
-	password := d.Get("password").(string)
-	certificate := d.Get("certificate").(string)
-	fileType := d.Get("file_type").(string)
 	database := d.Get("database").(string)
-	dbTimezone := d.Get("db_timezone").(string)
-	queryTimezone := d.Get("query_timezone").(string)
-	schemaString := d.Get("schema").(string)
-	maxConnections := d.Get("max_connctions").(int64)
-	maxBillingGigabytes := d.Get("max_billing_gigabytes").(string)
-	ssl := d.Get("ssl").(bool)
-	verifySsl := d.Get("verify_ssl").(bool)
-	tmpDbName := d.Get("tmp_db_name").(string)
-	jdbcAdditionalParams := d.Get("jdbc_additional_params").(string)
-	poolTimeout := d.Get("pool_timeout").(int64)
 	dialectName := d.Get("dialect_name").(string)
-	userDbCredentials := d.Get("user_db_credentials").(bool)
-	maintenanceCron := d.Get("maintenance_cron").(string)
-	sqlRunnerPrecacheTables := d.Get("sql_runner_precache_tables").(bool)
-	sqlWritingWithInfoSchema := d.Get("sql_writing_with_info_schema").(bool)
-	afterConnectStatements := d.Get("after_connect_statements").(string)
-	tunnelId := d.Get("tunnel_id").(string)
-	pdtConcurrency := d.Get("pdt_concurrency").(int64)
-	disable_context_comment := d.Get("disable_context_comment").(bool)
-	oauthApplicationId := d.Get("oauth_application_id").(int64)
-
 	writeDBConnection := &apiclient.WriteDBConnection{
-		Name:                     &name,
-		Host:                     &host,
-		Port:                     &port,
-		Username:                 &username,
-		Password:                 &password,
-		Certificate:              &certificate,
-		FileType:                 &fileType,
-		Database:                 &database,
-		DbTimezone:               &dbTimezone,
-		QueryTimezone:            &queryTimezone,
-		Schema:                   &schemaString,
-		MaxConnections:           &maxConnections,
-		MaxBillingGigabytes:      &maxBillingGigabytes,
-		Ssl:                      &ssl,
-		VerifySsl:                &verifySsl,
-		TmpDbName:                &tmpDbName,
-		JdbcAdditionalParams:     &jdbcAdditionalParams,
-		PoolTimeout:              &poolTimeout,
-		DialectName:              &dialectName,
-		UserDbCredentials:        &userDbCredentials,
-		UserAttributeFields:      nil,
-		MaintenanceCron:          &maintenanceCron,
-		SqlRunnerPrecacheTables:  &sqlRunnerPrecacheTables,
-		SqlWritingWithInfoSchema: &sqlWritingWithInfoSchema,
-		AfterConnectStatements:   &afterConnectStatements,
-		PdtContextOverride:       nil,
-		TunnelId:                 &tunnelId,
-		PdtConcurrency:           &pdtConcurrency,
-		DisableContextComment:    &disable_context_comment,
-		OauthApplicationId:       &oauthApplicationId,
+		Name:        &name,
+		Host:        &host,
+		Username:    &username,
+		Database:    &database,
+		DialectName: &dialectName,
+	}
+
+	// optional values
+	if v, ok := d.GetOk("port"); ok {
+		port := int64(v.(int))
+		writeDBConnection.Port = &port
+	}
+	if v, ok := d.GetOk("password"); ok {
+		password := v.(string)
+		writeDBConnection.Password = &password
+	}
+	if v, ok := d.GetOk("certificate"); ok {
+		certificate := v.(string)
+		writeDBConnection.Certificate = &certificate
+	}
+	if v, ok := d.GetOk("file_type"); ok {
+		fileType := v.(string)
+		writeDBConnection.FileType = &fileType
+	}
+	if v, ok := d.GetOk("db_timezone"); ok {
+		dbTimezone := v.(string)
+		writeDBConnection.DbTimezone = &dbTimezone
+	}
+	if v, ok := d.GetOk("query_timezone"); ok {
+		queryTimezone := v.(string)
+		writeDBConnection.QueryTimezone = &queryTimezone
+	}
+	if v, ok := d.GetOk("schema"); ok {
+		schema := v.(string)
+		writeDBConnection.Schema = &schema
+	}
+	if v, ok := d.GetOk("max_connections"); ok {
+		maxConnections := int64(v.(int))
+		writeDBConnection.MaxConnections = &maxConnections
+	}
+	if v, ok := d.GetOk("max_billing_gigabytes"); ok {
+		maxBillingGigabytes := v.(string)
+		writeDBConnection.MaxBillingGigabytes = &maxBillingGigabytes
+	}
+	if v, ok := d.GetOk("ssl"); ok {
+		ssl := v.(bool)
+		writeDBConnection.Ssl = &ssl
+	}
+	if v, ok := d.GetOk("verify_ssl"); ok {
+		verifySsl := v.(bool)
+		writeDBConnection.VerifySsl = &verifySsl
+	}
+	if v, ok := d.GetOk("tmp_db_name"); ok {
+		tmpDbName := v.(string)
+		writeDBConnection.TmpDbName = &tmpDbName
+	}
+	if v, ok := d.GetOk("jdbc_addtional_params"); ok {
+		jdbcAdditionalParams := v.(string)
+		writeDBConnection.JdbcAdditionalParams = &jdbcAdditionalParams
+	}
+
+	if v, ok := d.GetOk("pool_timeout"); ok {
+		poolTimeout := int64(v.(int))
+		writeDBConnection.PoolTimeout = &poolTimeout
+	}
+	if v, ok := d.GetOk("user_db_credentials"); ok {
+		userDbCredentials := v.(bool)
+		writeDBConnection.UserDbCredentials = &userDbCredentials
+	}
+	if v, ok := d.GetOk("maintenance_cron"); ok {
+		maintenanceCron := v.(string)
+		writeDBConnection.MaintenanceCron = &maintenanceCron
+	}
+	if v, ok := d.GetOk("sql_runner_precache_tables"); ok {
+		sqlRunnerPrecacheTables := v.(bool)
+		writeDBConnection.SqlRunnerPrecacheTables = &sqlRunnerPrecacheTables
+	}
+	if v, ok := d.GetOk("sql_writing_with_info_schema"); ok {
+		sqlWritingWithInfoSchema := v.(bool)
+		writeDBConnection.SqlWritingWithInfoSchema = &sqlWritingWithInfoSchema
+	}
+	if v, ok := d.GetOk("after_connect_statements"); ok {
+		afterConnectStatements := v.(string)
+		writeDBConnection.AfterConnectStatements = &afterConnectStatements
+	}
+	if v, ok := d.GetOk("tunnel_id"); ok {
+		tunnelId := v.(string)
+		writeDBConnection.TunnelId = &tunnelId
+	}
+	if v, ok := d.GetOk("pdt_concurrency"); ok {
+		pdtConcurrency := int64(v.(int))
+		writeDBConnection.PdtConcurrency = &pdtConcurrency
+	}
+	if v, ok := d.GetOk("disable_context_comment"); ok {
+		disable_context_comment := v.(bool)
+		writeDBConnection.DisableContextComment = &disable_context_comment
+	}
+	if v, ok := d.GetOk("oauth_application_id"); ok {
+		oauthApplicationId := int64(v.(int))
+		writeDBConnection.OauthApplicationId = &oauthApplicationId
 	}
 
 	userAttributeFields := expandStringListFromSet(d.Get("user_attribute_fields").(*schema.Set))
@@ -383,7 +435,7 @@ func expandWriteDBConnection(d *schema.ResourceData) *apiclient.WriteDBConnectio
 		writeDBConnection.PdtContextOverride = &pdtContextOverride
 	}
 
-	return writeDBConnection
+	return writeDBConnection, nil
 }
 
 func flattenConnection(connection apiclient.DBConnection, d *schema.ResourceData) error {

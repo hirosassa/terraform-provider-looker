@@ -17,7 +17,7 @@ resource "looker_connection" "bigquery_connection" {
   name         = "bigquery_connection"
   host         = "gcp_project_id"
   user         = var.gcp_service_account_email
-  certificate  = var.gcp_service_account_json
+  certificate  = filebase64("path/to/sa.json")
   file_type    = ".json"
   database     = "dataset_name"
   tmp_db_name  = "tmp_dataset_name"
@@ -62,14 +62,14 @@ resource "looker_connection" "snowflake_connection" {
 - **id** (String) The ID of this resource.
 - **jdbc_additional_params** (String)
 - **maintenance_cron** (String)
-- **max_billing_gigabyte** (String)
+- **max_billing_gigabytes** (String)
 - **max_connections** (Number)
 - **oauth_application_id** (Number)
 - **password** (String, Sensitive)
 - **pdt_concurrency** (Number)
 - **pdt_context_override** (Block List, Max: 1) (see [below for nested schema](#nestedblock--pdt_context_override))
 - **pool_timeout** (Number)
-- **port** (String)
+- **port** (Number)
 - **query_timezone** (String)
 - **schema** (String)
 - **sql_runner_precache_tables** (Boolean)

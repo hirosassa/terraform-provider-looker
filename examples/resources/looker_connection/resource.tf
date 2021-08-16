@@ -2,7 +2,7 @@ resource "looker_connection" "bigquery_connection" {
   name         = "bigquery_connection"
   host         = "gcp_project_id"
   user         = var.gcp_service_account_email
-  certificate  = var.gcp_service_account_json
+  certificate  = filebase64("path/to/sa.json")
   file_type    = ".json"
   database     = "dataset_name"
   tmp_db_name  = "tmp_dataset_name"
