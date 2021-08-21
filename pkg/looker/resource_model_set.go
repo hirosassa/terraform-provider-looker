@@ -1,20 +1,22 @@
 package looker
 
 import (
+	"context"
 	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	apiclient "github.com/looker-open-source/sdk-codegen/go/sdk/v4"
 )
 
 func resourceModelSet() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceModelSetCreate,
-		Read:   resourceModelSetRead,
-		Update: resourceModelSetUpdate,
-		Delete: resourceModelSetDelete,
+		CreateContext: resourceModelSetCreate,
+		ReadContext:   resourceModelSetRead,
+		UpdateContext: resourceModelSetUpdate,
+		DeleteContext: resourceModelSetDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceModelSetImport,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -31,7 +33,7 @@ func resourceModelSet() *schema.Resource {
 	}
 }
 
-func resourceModelSetCreate(d *schema.ResourceData, m interface{}) error {
+func resourceModelSetCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
 	modelSetName := d.Get("name").(string)
@@ -48,44 +50,44 @@ func resourceModelSetCreate(d *schema.ResourceData, m interface{}) error {
 
 	modelSet, err := client.CreateModelSet(writeModelSet, nil)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	modelSetID := *modelSet.Id
 	d.SetId(strconv.Itoa(int(modelSetID)))
 
-	return resourceModelSetRead(d, m)
+	return resourceModelSetRead(ctx, d, m)
 }
 
-func resourceModelSetRead(d *schema.ResourceData, m interface{}) error {
+func resourceModelSetRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
 	modelSetID, err := strconv.ParseInt(d.Id(), 10, 64)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	modelSet, err := client.ModelSet(modelSetID, "", nil)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err = d.Set("name", modelSet.Name); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err = d.Set("models", modelSet.Models); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceModelSetUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceModelSetUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
 	modelSetID, err := strconv.ParseInt(d.Id(), 10, 64)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	modelSetName := d.Get("name").(string)
 	var modelNames []string
@@ -98,30 +100,24 @@ func resourceModelSetUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 	_, err = client.UpdateModelSet(modelSetID, writeModelSet, nil)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceModelSetRead(d, m)
+	return resourceModelSetRead(ctx, d, m)
 }
 
-func resourceModelSetDelete(d *schema.ResourceData, m interface{}) error {
+func resourceModelSetDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
 	modelSetID, err := strconv.ParseInt(d.Id(), 10, 64)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	_, err = client.DeleteModelSet(modelSetID, nil)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
-}
-func resourceModelSetImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	if err := resourceModelSetRead(d, m); err != nil {
-		return nil, err
-	}
-	return []*schema.ResourceData{d}, nil
 }

@@ -1,20 +1,22 @@
 package looker
 
 import (
+	"context"
 	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	apiclient "github.com/looker-open-source/sdk-codegen/go/sdk/v4"
 )
 
 func resourceGroup() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceGroupCreate,
-		Read:   resourceGroupRead,
-		Update: resourceGroupUpdate,
-		Delete: resourceGroupDelete,
+		CreateContext: resourceGroupCreate,
+		ReadContext:   resourceGroupRead,
+		UpdateContext: resourceGroupUpdate,
+		DeleteContext: resourceGroupDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceGroupImport,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -26,7 +28,7 @@ func resourceGroup() *schema.Resource {
 	}
 }
 
-func resourceGroupCreate(d *schema.ResourceData, m interface{}) error {
+func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 	groupName := d.Get("name").(string)
 
@@ -36,41 +38,41 @@ func resourceGroupCreate(d *schema.ResourceData, m interface{}) error {
 
 	group, err := client.CreateGroup(writeGroup, "", nil)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	groupID := *group.Id
 	d.SetId(strconv.Itoa(int(groupID)))
 
-	return resourceGroupRead(d, m)
+	return resourceGroupRead(ctx, d, m)
 }
 
-func resourceGroupRead(d *schema.ResourceData, m interface{}) error {
+func resourceGroupRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
 	groupID, err := strconv.ParseInt(d.Id(), 10, 64)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	group, err := client.Group(groupID, "", nil)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err = d.Set("name", group.Name); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceGroupUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
 	groupID, err := strconv.ParseInt(d.Id(), 10, 64)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	groupName := d.Get("name").(string)
@@ -79,31 +81,24 @@ func resourceGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 	_, err = client.UpdateGroup(groupID, writeGroup, "", nil)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceGroupRead(d, m)
+	return resourceGroupRead(ctx, d, m)
 }
 
-func resourceGroupDelete(d *schema.ResourceData, m interface{}) error {
+func resourceGroupDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
 	groupID, err := strconv.ParseInt(d.Id(), 10, 64)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	_, err = client.DeleteGroup(groupID, nil)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
-}
-
-func resourceGroupImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	if err := resourceGroupRead(d, m); err != nil {
-		return nil, err
-	}
-	return []*schema.ResourceData{d}, nil
 }

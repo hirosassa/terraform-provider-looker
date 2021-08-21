@@ -1,6 +1,9 @@
 package looker
 
 import (
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/looker-open-source/sdk-codegen/go/rtl"
 	apiclient "github.com/looker-open-source/sdk-codegen/go/sdk/v4"
@@ -60,11 +63,11 @@ func Provider() *schema.Provider {
 			"looker_connection":       resourceConnection(),
 		},
 
-		ConfigureFunc: providerConfigure,
+		ConfigureContextFunc: providerConfigure,
 	}
 }
 
-func providerConfigure(d *schema.ResourceData) (interface{}, error) {
+func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	baseUrl := d.Get("base_url").(string)
 	clientID := d.Get("client_id").(string)
 	clientSecret := d.Get("client_secret").(string)
@@ -82,5 +85,5 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	authSession := rtl.NewAuthSession(apiSettings)
 	client := apiclient.NewLookerSDK(authSession)
 
-	return client, nil
+	return client, diag.Diagnostics{}
 }

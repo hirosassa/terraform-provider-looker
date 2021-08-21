@@ -1,20 +1,22 @@
 package looker
 
 import (
+	"context"
 	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	apiclient "github.com/looker-open-source/sdk-codegen/go/sdk/v4"
 )
 
 func resourceUserAttribute() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceUserAttributeCreate,
-		Read:   resourceUserAttributeRead,
-		Update: resourceUserAttributeUpdate,
-		Delete: resourceUserAttributeDelete,
+		CreateContext: resourceUserAttributeCreate,
+		ReadContext:   resourceUserAttributeRead,
+		UpdateContext: resourceUserAttributeUpdate,
+		DeleteContext: resourceUserAttributeDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceUserAttributeImport,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -34,7 +36,7 @@ func resourceUserAttribute() *schema.Resource {
 	}
 }
 
-func resourceUserAttributeCreate(d *schema.ResourceData, m interface{}) error {
+func resourceUserAttributeCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 	userAttributeName := d.Get("name").(string)
 	userAttributeLabel := d.Get("label").(string)
@@ -48,47 +50,47 @@ func resourceUserAttributeCreate(d *schema.ResourceData, m interface{}) error {
 
 	userAttribute, err := client.CreateUserAttribute(writeUserAttribute, "", nil)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	userAttributeID := *userAttribute.Id
 	d.SetId(strconv.Itoa(int(userAttributeID)))
 
-	return resourceUserAttributeRead(d, m)
+	return resourceUserAttributeRead(ctx, d, m)
 }
 
-func resourceUserAttributeRead(d *schema.ResourceData, m interface{}) error {
+func resourceUserAttributeRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
 	userAttributeID, err := strconv.ParseInt(d.Id(), 10, 64)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	userAttribute, err := client.UserAttribute(userAttributeID, "", nil)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err = d.Set("name", userAttribute.Name); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err = d.Set("type", userAttribute.Type); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err = d.Set("label", userAttribute.Label); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceUserAttributeUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceUserAttributeUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
 	userAttributeID, err := strconv.ParseInt(d.Id(), 10, 64)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	userAttributeName := d.Get("name").(string)
@@ -103,31 +105,24 @@ func resourceUserAttributeUpdate(d *schema.ResourceData, m interface{}) error {
 
 	_, err = client.UpdateUserAttribute(userAttributeID, writeUserAttribute, "", nil)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceUserAttributeRead(d, m)
+	return resourceUserAttributeRead(ctx, d, m)
 }
 
-func resourceUserAttributeDelete(d *schema.ResourceData, m interface{}) error {
+func resourceUserAttributeDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
 	userAttributeID, err := strconv.ParseInt(d.Id(), 10, 64)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	_, err = client.DeleteUserAttribute(userAttributeID, nil)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
-}
-
-func resourceUserAttributeImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	if err := resourceUserAttributeRead(d, m); err != nil {
-		return nil, err
-	}
-	return []*schema.ResourceData{d}, nil
 }

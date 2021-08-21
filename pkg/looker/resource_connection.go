@@ -1,8 +1,10 @@
 package looker
 
 import (
+	"context"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	apiclient "github.com/looker-open-source/sdk-codegen/go/sdk/v4"
@@ -10,12 +12,12 @@ import (
 
 func resourceConnection() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceConnectionCreate,
-		Read:   resourceConnectionRead,
-		Update: resourceConnectionUpdate,
-		Delete: resourceConnectionDelete,
+		CreateContext: resourceConnectionCreate,
+		ReadContext:   resourceConnectionRead,
+		UpdateContext: resourceConnectionUpdate,
+		DeleteContext: resourceConnectionDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceConnectionImport,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -235,25 +237,25 @@ func resourceConnection() *schema.Resource {
 	}
 }
 
-func resourceConnectionCreate(d *schema.ResourceData, m interface{}) error {
+func resourceConnectionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
 	body, err := expandWriteDBConnection(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	result, err := client.CreateConnection(*body, nil)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(*result.Name)
 
-	return resourceConnectionRead(d, m)
+	return resourceConnectionRead(ctx, d, m)
 }
 
-func resourceConnectionRead(d *schema.ResourceData, m interface{}) error {
+func resourceConnectionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 	connectionName := d.Get("name").(string)
 
@@ -263,47 +265,40 @@ func resourceConnectionRead(d *schema.ResourceData, m interface{}) error {
 			d.SetId("")
 			return nil
 		}
-		return err
+		return diag.FromErr(err)
 	}
 
-	return flattenConnection(connection, d)
+	return diag.FromErr(flattenConnection(connection, d))
 }
 
-func resourceConnectionUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceConnectionUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
 	name := d.Get("name").(string)
 	body, err := expandWriteDBConnection(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	_, err = client.UpdateConnection(name, *body, nil)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceConnectionRead(d, m)
+	return resourceConnectionRead(ctx, d, m)
 }
 
-func resourceConnectionDelete(d *schema.ResourceData, m interface{}) error {
+func resourceConnectionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
 	connectionName := d.Id()
 
 	_, err := client.DeleteConnection(connectionName, nil)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
-}
-
-func resourceConnectionImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	if err := resourceConnectionRead(d, m); err != nil {
-		return nil, err
-	}
-	return []*schema.ResourceData{d}, nil
 }
 
 func expandWriteDBConnection(d *schema.ResourceData) (*apiclient.WriteDBConnection, error) {
