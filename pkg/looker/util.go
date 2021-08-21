@@ -3,6 +3,8 @@ package looker
 import (
 	"fmt"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // format the strings into an id `a:b`
@@ -20,4 +22,24 @@ func parseTwoPartID(id string) (string, string, error) {
 	}
 
 	return parts[0], parts[1], nil
+}
+
+func expandStringListFromSet(set *schema.Set) []string {
+	strings := make([]string, 0, set.Len())
+	for _, v := range set.List() {
+		strings = append(strings, v.(string))
+	}
+	return strings
+}
+
+func flattenStringList(strings []string) []interface{} {
+	vs := make([]interface{}, 0, len(strings))
+	for _, v := range strings {
+		vs = append(vs, v)
+	}
+	return vs
+}
+
+func flattenStringListToSet(strings []string) *schema.Set {
+	return schema.NewSet(schema.HashString, flattenStringList(strings))
 }

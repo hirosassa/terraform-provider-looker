@@ -1,7 +1,6 @@
 package looker
 
 import (
-	"log"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -26,6 +25,7 @@ func resourceConnection() *schema.Resource {
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return strings.EqualFold(old, new) // case-insensive comparing
 				},
+				ValidateFunc: validation.StringDoesNotContainAny(" "),
 			},
 			"host": {
 				Type:     schema.TypeString,
@@ -44,18 +44,27 @@ func resourceConnection() *schema.Resource {
 				Optional:  true,
 				ForceNew:  true,
 				Sensitive: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Id() != ""
+				},
 			},
 			"certificate": {
 				Type:      schema.TypeString,
 				Optional:  true,
 				ForceNew:  true,
 				Sensitive: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Id() != ""
+				},
 			},
 			"file_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{".json", ".p12"}, false),
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Id() != ""
+				},
 			},
 			"database": {
 				Type:     schema.TypeString,
@@ -76,6 +85,9 @@ func resourceConnection() *schema.Resource {
 			"max_connections": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Id() != ""
+				},
 			},
 			"max_billing_gigabytes": {
 				Type:     schema.TypeString,
@@ -122,10 +134,16 @@ func resourceConnection() *schema.Resource {
 			"sql_runner_precache_tables": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Id() != ""
+				},
 			},
 			"sql_writing_with_info_schema": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Id() != ""
+				},
 			},
 			"after_connect_statements": {
 				Type:     schema.TypeString,
@@ -198,10 +216,16 @@ func resourceConnection() *schema.Resource {
 			"pdt_concurrency": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Id() != ""
+				},
 			},
 			"disable_context_comment": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Id() != ""
+				},
 			},
 			"oauth_application_id": {
 				Type:     schema.TypeInt,
@@ -221,7 +245,6 @@ func resourceConnectionCreate(d *schema.ResourceData, m interface{}) error {
 
 	result, err := client.CreateConnection(*body, nil)
 	if err != nil {
-		log.Printf("[ERROR] %v", err)
 		return err
 	}
 
@@ -543,24 +566,4 @@ func flattenConnection(connection apiclient.DBConnection, d *schema.ResourceData
 		return err
 	}
 	return nil
-}
-
-func expandStringListFromSet(set *schema.Set) []string {
-	strings := make([]string, 0, set.Len())
-	for _, v := range set.List() {
-		strings = append(strings, v.(string))
-	}
-	return strings
-}
-
-func flattenStringList(strings []string) []interface{} {
-	vs := make([]interface{}, 0, len(strings))
-	for _, v := range strings {
-		vs = append(vs, v)
-	}
-	return vs
-}
-
-func flattenStringListToSet(strings []string) *schema.Set {
-	return schema.NewSet(schema.HashString, flattenStringList(strings))
 }
