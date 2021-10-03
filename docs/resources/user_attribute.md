@@ -17,6 +17,8 @@ resource "looker_user_attribute" "my_user_attribute" {
   name  = "my_name"
   label = "Display Label"
   type  = "advanced_filter_string"
+  default_value = "%, NULL"
+  user_can_view = true
 }
 ```
 
@@ -31,6 +33,10 @@ resource "looker_user_attribute" "my_user_attribute" {
 
 ### Optional
 
+- **default_value** (String)
 - **id** (String) The ID of this resource.
+- **user_can_edit** (Boolean)
+- **user_can_view** (Boolean)
+- **value_is_hidden** (Boolean)
 
 
