@@ -51,15 +51,3 @@ func expandInt64ListFromSet(set interface{}) []int64 {
 	}
 	return ints
 }
-
-func flattenInt64List(ints []int64) []interface{} {
-	vs := make([]interface{}, 0, len(ints))
-	for _, v := range ints {
-		vs = append(vs, v)
-	}
-	return vs
-}
-
-func flattenInt64ListToSet(ints []int64) *schema.Set {
-	return schema.NewSet(schema.HashInt, flattenInt64List(ints))
-}

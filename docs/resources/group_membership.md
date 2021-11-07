@@ -24,8 +24,9 @@ resource "looker_group_membership" "group_membership" {
 
 ### Required
 
-- **group_id** (String)
-- **user_id** (String)
+- **group_ids** (Set of Number)
+- **target_group_id** (Number)
+- **user_ids** (Set of Number)
 
 ### Optional
 
