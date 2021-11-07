@@ -25,12 +25,12 @@ resource "looker_group_membership" "group_membership" {
 
 ### Required
 
-- **group_ids** (Set of Number)
 - **target_group_id** (Number)
-- **user_ids** (Set of Number)
 
 ### Optional
 
+- **group_ids** (Set of Number)
 - **id** (String) The ID of this resource.
+- **user_ids** (Set of Number)
 
 
