@@ -2,6 +2,7 @@ package looker
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -17,7 +18,7 @@ func resourceConnection() *schema.Resource {
 		UpdateContext: resourceConnectionUpdate,
 		DeleteContext: resourceConnectionDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: resourceConnectionImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -257,7 +258,7 @@ func resourceConnectionCreate(ctx context.Context, d *schema.ResourceData, m int
 
 func resourceConnectionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
-	connectionName := d.Get("name").(string)
+	connectionName := d.Id()
 
 	connection, err := client.Connection(connectionName, "", nil)
 	if err != nil {
@@ -274,7 +275,7 @@ func resourceConnectionRead(ctx context.Context, d *schema.ResourceData, m inter
 func resourceConnectionUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
-	name := d.Get("name").(string)
+	name := d.Id()
 	body, err := expandWriteDBConnection(d)
 	if err != nil {
 		return diag.FromErr(err)
@@ -299,6 +300,13 @@ func resourceConnectionDelete(ctx context.Context, d *schema.ResourceData, m int
 	}
 
 	return nil
+}
+
+func resourceConnectionImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	if err := resourceConnectionRead(ctx, d, m); err != nil {
+		return nil, fmt.Errorf("failed to read connection: %v", err)
+	}
+	return []*schema.ResourceData{d}, nil
 }
 
 func expandWriteDBConnection(d *schema.ResourceData) (*apiclient.WriteDBConnection, error) {
@@ -514,8 +522,10 @@ func flattenConnection(connection apiclient.DBConnection, d *schema.ResourceData
 	if err := d.Set("dialect_name", connection.DialectName); err != nil {
 		return err
 	}
-	if err := d.Set("user_attribute_fields", flattenStringListToSet(*connection.UserAttributeFields)); err != nil {
-		return err
+	if connection.UserAttributeFields != nil {
+		if err := d.Set("user_attribute_fields", flattenStringListToSet(*connection.UserAttributeFields)); err != nil {
+			return err
+		}
 	}
 	if err := d.Set("maintenance_cron", connection.MaintenanceCron); err != nil {
 		return err

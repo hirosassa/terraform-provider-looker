@@ -20,45 +20,44 @@ func resourceGroupMembership() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"group_id": {
-				Type:     schema.TypeString,
+			"target_group_id": {
+				Type:     schema.TypeInt,
 				Required: true,
 			},
-			"user_id": {
-				Type:     schema.TypeString,
+			"user_ids": {
+				Type:     schema.TypeSet,
 				Required: true,
+				Elem:     &schema.Schema{Type: schema.TypeInt},
+				Set:      schema.HashInt,
+			},
+			"group_ids": {
+				Type:     schema.TypeSet,
+				Required: true,
+				Elem:     &schema.Schema{Type: schema.TypeInt},
+				Set:      schema.HashInt,
 			},
 		},
 	}
 }
 
 func resourceGroupMembershipCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*apiclient.LookerSDK)
+	targetGroupID := d.Get("taget_group_id").(int64)
 
-	groupIDString := d.Get("group_id").(string)
-
-	groupID, err := strconv.ParseInt(groupIDString, 10, 64)
+	// add users
+	userIDs := expandInt64ListFromSet(d.Get("user_ids"))
+	err := addGroupUsers(m, targetGroupID, userIDs)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	userIDString := d.Get("user_id").(string)
-
-	userID, err := strconv.ParseInt(userIDString, 10, 64)
+	// add groups
+	groupIDs := expandInt64ListFromSet(d.Get("group_ids"))
+	err = addGroupGroups(m, targetGroupID, groupIDs)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	body := apiclient.GroupIdForGroupUserInclusion{
-		UserId: &userID,
-	}
-
-	_, err = client.AddGroupUser(groupID, body, nil)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	d.SetId(buildTwoPartID(&groupIDString, &userIDString))
+	d.SetId(strconv.Itoa(int(targetGroupID)))
 
 	return resourceGroupMembershipRead(ctx, d, m)
 }
@@ -66,14 +65,11 @@ func resourceGroupMembershipCreate(ctx context.Context, d *schema.ResourceData, 
 func resourceGroupMembershipRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
-	id := d.Id()
-	groupID, userID, err := groupIDAndUserIDFromID(id)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	targetGroupID := d.Get("taget_group_id").(int64)
+
 
 	req := apiclient.RequestAllGroupUsers{
-		GroupId: groupID,
+		GroupId: targetGroupID,
 	}
 
 	users, err := client.AllGroupUsers(req, nil) // todo: imeplement paging
@@ -81,38 +77,50 @@ func resourceGroupMembershipRead(ctx context.Context, d *schema.ResourceData, m 
 		return diag.FromErr(err)
 	}
 
-	if err = d.Set("group_id", strconv.Itoa(int(groupID))); err != nil {
+	groups, err := client.AllGroupGroups(targetGroupID, "", nil) // todo: imeplement paging
+	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if isContained(users, userID) {
-		if err = d.Set("user_id", strconv.Itoa(int(userID))); err != nil {
-			return diag.FromErr(err)
-		}
-	} else {
-		if err = d.Set("user_id", ""); err != nil {
-			return diag.FromErr(err)
-		}
+	if err = d.Set("taget_group_id", int(targetGroupID)); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err = d.Set("user_ids", flattenUserIDs(users)); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err = d.Set("group_ids", flattenGroupIDs(groups)); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
 func resourceGroupMembershipUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// there's no update in this resource
-	return resourceGroupMembershipCreate(ctx, d, m)
-}
-
-func resourceGroupMembershipDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(*apiclient.LookerSDK)
-
-	id := d.Id()
-	groupID, userID, err := groupIDAndUserIDFromID(id)
+	targetGroupID, err := strconv.ParseInt(d.Id(), 10, 64)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = client.DeleteGroupUser(groupID, userID, nil)
+	err = removeAllUsersFromGroup(m, targetGroupID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = removeAllGroupsFromGroup(m, targetGroupID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	userIDs := expandInt64ListFromSet(d.Get("user_ids"))
+	err = addGroupUsers(m, targetGroupID, userIDs)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	groupIDs := expandInt64ListFromSet(d.Get("group_ids"))
+	err = addGroupGroups(m, targetGroupID, groupIDs)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -120,30 +128,109 @@ func resourceGroupMembershipDelete(ctx context.Context, d *schema.ResourceData, 
 	return resourceGroupMembershipRead(ctx, d, m)
 }
 
-func isContained(users []apiclient.User, userID int64) bool {
-	for _, user := range users {
-		if user.Id == &userID {
-			return true
-		}
+func resourceGroupMembershipDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	targetGroupID, err := strconv.ParseInt(d.Id(), 10, 64)
+	if err != nil {
+		return diag.FromErr(err)
 	}
-	return false
+
+	err = removeAllUsersFromGroup(m, targetGroupID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = removeAllGroupsFromGroup(m, targetGroupID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return resourceGroupMembershipRead(ctx, d, m)
 }
 
-func groupIDAndUserIDFromID(id string) (int64, int64, error) {
-	groupIDString, userIDString, err := parseTwoPartID(id)
-	if err != nil {
-		return 0, 0, err
+func addGroupUsers(m interface{}, targetGroupID int64, userIDs []int64) error {
+	client := m.(*apiclient.LookerSDK)
+
+	for _, userID := range userIDs {
+		body := apiclient.GroupIdForGroupUserInclusion{
+			UserId: &userID,
+		}
+
+		_, err := client.AddGroupUser(targetGroupID, body, nil)
+		if err != nil {
+			return err
+		}
 	}
 
-	groupID, err := strconv.ParseInt(groupIDString, 10, 64)
-	if err != nil {
-		return 0, 0, err
+	return nil
+}
+
+func addGroupGroups(m interface{}, targetGroupID int64, groupIDs []int64) error {
+	client := m.(*apiclient.LookerSDK)
+
+	for _, groupID := range groupIDs {
+		body := apiclient.GroupIdForGroupInclusion{
+			GroupId: &groupID,
+		}
+
+		_, err := client.AddGroupGroup(targetGroupID, body, nil)
+		if err != nil {
+			return err
+		}
 	}
 
-	userID, err := strconv.ParseInt(userIDString, 10, 64)
-	if err != nil {
-		return 0, 0, err
+	return nil
+}
+
+func removeAllUsersFromGroup(m interface{}, groupID int64) error {
+	client := m.(*apiclient.LookerSDK)
+	req := apiclient.RequestAllGroupUsers{
+		GroupId: groupID,
 	}
 
-	return groupID, userID, err
+	users, err := client.AllGroupUsers(req, nil) // todo: imeplement paging
+	if err != nil {
+		return err
+	}
+
+	for _, user := range users {
+		err = client.DeleteGroupUser(groupID, *user.Id, nil)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func removeAllGroupsFromGroup(m interface{}, groupID int64) error {
+	client := m.(*apiclient.LookerSDK)
+	groups, err := client.AllGroupGroups(groupID, "", nil) // todo: imeplement paging
+	if err != nil {
+		return err
+	}
+
+	for _, group := range groups {
+		err = client.DeleteGroupFromGroup(groupID, *group.Id, nil)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func flattenUserIDs(users []apiclient.User) []int {
+	userIDs := make([]int, 0, len(users))
+	for _, user := range users {
+		userIDs = append(userIDs, int(*user.Id))
+	}
+	return userIDs
+}
+
+func flattenGroupIDs(groups []apiclient.Group) []int {
+	groupIDs := make([]int, 0, len(groups))
+	for _, group := range groups {
+		groupIDs = append(groupIDs, int(*group.Id))
+	}
+	return groupIDs
 }

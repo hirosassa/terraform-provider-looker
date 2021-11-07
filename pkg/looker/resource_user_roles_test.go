@@ -10,15 +10,14 @@ import (
 )
 
 func TestAcc_UserRoles(t *testing.T) {
-	name1 := strings.ToUpper(acctest.RandStringFromCharSet(10, acctest.CharSetAlpha))
-	email := "test@example.com"
+	name := strings.ToUpper(acctest.RandStringFromCharSet(10, acctest.CharSetAlpha))
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: providers(),
 		Steps: []resource.TestStep{
 			{
-				Config: userRolesConfig(name1, email),
+				Config: userRolesConfig(name),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("looker_user_roles.user_role_test", "role_ids.#", "1"),
 				),
@@ -32,12 +31,10 @@ func TestAcc_UserRoles(t *testing.T) {
 	})
 }
 
-func userRolesConfig(name, email string) string {
+func userRolesConfig(name string) string {
 	return fmt.Sprintf(`
 	resource "looker_user" "user_role_test" {
-		first_name = "%s"
-		last_name = "%s"
-		email = "%s"
+		email = "%s@example.com"
 	}
 	resource "looker_model_set" "user_role_test" {
 		name = "%s"
@@ -45,7 +42,7 @@ func userRolesConfig(name, email string) string {
 	}
 	resource "looker_permission_set" "user_role_test" {
 		name = "%s"
-		permissions = ["test"]
+		permissions = ["access_data"]
 	}
 	resource "looker_role" "user_role_test" {
 		name = "%s"
@@ -56,5 +53,5 @@ func userRolesConfig(name, email string) string {
 		user_id  = looker_user.user_role_test.id
 		role_ids = [looker_role.user_role_test.id]
 	}
-	`, name, name, email, name, name, name)
+	`, name, name, name, name)
 }

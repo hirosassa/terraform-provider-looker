@@ -10,18 +10,19 @@ import (
 )
 
 func TestAcc_LookMLModel(t *testing.T) {
-	name1 := strings.ToUpper(acctest.RandStringFromCharSet(10, acctest.CharSetAlpha))
-	name2 := strings.ToUpper(acctest.RandStringFromCharSet(10, acctest.CharSetAlpha))
+	name := strings.ToUpper(acctest.RandStringFromCharSet(10, acctest.CharSetAlpha))
+	connectionName := strings.ToUpper(acctest.RandStringFromCharSet(10, acctest.CharSetAlpha))
+	projectName := strings.ToUpper(acctest.RandStringFromCharSet(10, acctest.CharSetAlpha))
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: providers(),
 		Steps: []resource.TestStep{
 			{
-				Config: lookMLModelConfig(name1, name2),
+				Config: lookMLModelConfig(name, connectionName, projectName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("looker_lookml_model.test", "name", name1),
-					resource.TestCheckResourceAttr("looker_lookml_model.test", "project_name", "name2"),
+					resource.TestCheckResourceAttr("looker_lookml_model.test", "name", name),
+					resource.TestCheckResourceAttr("looker_lookml_model.test", "project_name", projectName),
 				),
 			},
 			{
@@ -33,12 +34,22 @@ func TestAcc_LookMLModel(t *testing.T) {
 	})
 }
 
-func lookMLModelConfig(name1, name2 string) string {
+func lookMLModelConfig(name, connectionName, projectName string) string {
 	return fmt.Sprintf(`
-	resource "looker_lookml_model" "test" {
-		name = %s
-		allowed_db_connection_names = ["bigquery-connection"]
-		project_name = %s
+	resource "looker_connection" "test" {
+		name         = "%s"
+		host         = "testproject"
+		username     = "test@testproject.iam.gserviceaccount.com"
+		certificate  = filebase64("testdata/gcp-sa.json")
+		file_type    = ".json"
+		database     = "test_dataset"
+		tmp_db_name  = "tmp_test_dataset"
+		dialect_name = "bigquery_standard_sql"
 	}
-	`, name1, name2)
+	resource "looker_lookml_model" "test" {
+		name = "%s"
+		allowed_db_connection_names = [looker_connection.test.name]
+		project_name = "%s"
+	}
+	`, connectionName, name, projectName)
 }

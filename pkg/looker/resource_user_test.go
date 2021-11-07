@@ -10,28 +10,18 @@ import (
 )
 
 func TestAcc_User(t *testing.T) {
-	name1 := strings.ToUpper(acctest.RandStringFromCharSet(10, acctest.CharSetAlpha))
-	name2 := strings.ToUpper(acctest.RandStringFromCharSet(10, acctest.CharSetAlpha))
-	email := "test2@example.com"
+	name := strings.ToUpper(acctest.RandStringFromCharSet(10, acctest.CharSetAlpha))
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: providers(),
 		Steps: []resource.TestStep{
 			{
-				Config: userConfig(name1, name1, email),
+				Config: userConfig(name, name, name),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("looker_user.test", "first_name", name1),
-					resource.TestCheckResourceAttr("looker_user.test", "last_name", name1),
-					resource.TestCheckResourceAttr("looker_user.test", "email", email),
-				),
-			},
-			{
-				Config: userConfig(name2, name2, email),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("looker_user.test", "first_name", name2),
-					resource.TestCheckResourceAttr("looker_user.test", "last_name", name2),
-					resource.TestCheckResourceAttr("looker_user.test", "email", email),
+					resource.TestCheckResourceAttr("looker_user.test", "first_name", name),
+					resource.TestCheckResourceAttr("looker_user.test", "last_name", name),
+					resource.TestCheckResourceAttr("looker_user.test", "email", fmt.Sprintf("%s@example.com", name)),
 				),
 			},
 			{
@@ -48,7 +38,7 @@ func userConfig(firstName, lastName, email string) string {
 	resource "looker_user" "test" {
 		first_name = "%s"
 		last_name = "%s"
-		email = "%s"
+		email = "%s@example.com"
 	}
 	`, firstName, lastName, email)
 }

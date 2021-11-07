@@ -1,0 +1,10 @@
+{
+  "type": "service_account",
+  "project_id": "testproject",
+  "private_key_id": "dummydummydummydummydummydummydummy",
+  "private_key": "dummydummydummydummydummydummydummydummydummy",
+  "client_email": "test@testproject.iam.gserviceaccount.com",
+  "client_id": "1234567890123456789012345678901234567890",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/robot/v1/metadata/x509/test@testproject.iam.gserviceaccount.com"
+}
