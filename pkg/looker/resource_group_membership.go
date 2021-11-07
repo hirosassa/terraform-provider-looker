@@ -26,13 +26,13 @@ func resourceGroupMembership() *schema.Resource {
 			},
 			"user_ids": {
 				Type:     schema.TypeSet,
-				Required: true,
+				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeInt},
 				Set:      schema.HashInt,
 			},
 			"group_ids": {
 				Type:     schema.TypeSet,
-				Required: true,
+				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeInt},
 				Set:      schema.HashInt,
 			},
@@ -41,7 +41,7 @@ func resourceGroupMembership() *schema.Resource {
 }
 
 func resourceGroupMembershipCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	targetGroupID := d.Get("taget_group_id").(int64)
+	targetGroupID := int64(d.Get("target_group_id").(int))
 
 	// add users
 	userIDs := expandInt64ListFromSet(d.Get("user_ids"))
@@ -65,8 +65,7 @@ func resourceGroupMembershipCreate(ctx context.Context, d *schema.ResourceData, 
 func resourceGroupMembershipRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
-	targetGroupID := d.Get("taget_group_id").(int64)
-
+	targetGroupID := int64(d.Get("target_group_id").(int))
 
 	req := apiclient.RequestAllGroupUsers{
 		GroupId: targetGroupID,
@@ -82,7 +81,7 @@ func resourceGroupMembershipRead(ctx context.Context, d *schema.ResourceData, m 
 		return diag.FromErr(err)
 	}
 
-	if err = d.Set("taget_group_id", int(targetGroupID)); err != nil {
+	if err = d.Set("target_group_id", int(targetGroupID)); err != nil {
 		return diag.FromErr(err)
 	}
 

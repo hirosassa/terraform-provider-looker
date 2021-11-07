@@ -70,7 +70,9 @@ func testAccCheckUserRoleDestroy(s *terraform.State) error {
 func userRolesConfig(name string) string {
 	return fmt.Sprintf(`
 	resource "looker_user" "user_role_test" {
-		email = "%s@example.com"
+        first_name = "%s"
+        last_name  = "%s"
+		email      = "%s@example.com"
 	}
 	resource "looker_model_set" "user_role_test" {
 		name = "%s"
@@ -89,5 +91,5 @@ func userRolesConfig(name string) string {
 		user_id  = looker_user.user_role_test.id
 		role_ids = [looker_role.user_role_test.id]
 	}
-	`, name, name, name, name)
+	`, name, name, name, name, name, name)
 }

@@ -2,7 +2,6 @@ package looker
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"testing"
 
@@ -69,7 +68,6 @@ func testAccCheckConnectionDestroy(s *terraform.State) error {
 		connectionName := rs.Primary.ID
 		_, err := client.Connection(connectionName, "", nil)
 		if err != nil {
-			log.Printf("[WARN] get connection: %s", err.Error())
 			if strings.Contains(err.Error(), "404") {
 				return nil // successfully destroyed
 			}

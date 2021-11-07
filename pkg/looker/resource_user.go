@@ -3,8 +3,11 @@ package looker
 import (
 	"context"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	apiclient "github.com/looker-open-source/sdk-codegen/go/sdk/v4"
 )
@@ -46,7 +49,21 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface
 		LastName:  &lastName,
 	}
 
-	user, err := client.CreateUser(writeUser, "", nil)
+	// CreateUser sometimes returns 500 error
+	var user apiclient.User
+	err := resource.RetryContext(ctx, 1*time.Minute, func() *resource.RetryError {
+		var err error
+
+		user, err = client.CreateUser(writeUser, "", nil)
+		if err != nil {
+			if d.IsNewResource() && strings.Contains(err.Error(), "500") {
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
+	})
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -57,6 +74,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface
 	writeCredentialsEmail := apiclient.WriteCredentialsEmail{
 		Email: &email,
 	}
+
 	_, err = client.CreateUserCredentialsEmail(userID, writeCredentialsEmail, "", nil)
 	if err != nil {
 		if _, err = client.DeleteUser(userID, nil); err != nil {
