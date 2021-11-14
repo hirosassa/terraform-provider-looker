@@ -60,6 +60,7 @@ func Provider() *schema.Provider {
 			"looker_role":             resourceRole(),
 			"looker_role_groups":      resourceRoleGroups(),
 			"looker_user_attribute":   resourceUserAttribute(),
+			"looker_user_attribute_user_value": resourceUserAttributeUserValue(),
 			"looker_connection":       resourceConnection(),
 			"looker_lookml_model":     resourceLookMLModel(),
 		},
