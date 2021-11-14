@@ -181,7 +181,7 @@ func groupMembershipConfigNoGroup(target, user1, user2 string) string {
 	`, target, user1, user1, user1, user2, user2, user2)
 }
 
-func groupMembershipConfigUpdate(target, user1, user2, user5, group1  string) string {
+func groupMembershipConfigUpdate(target, user1, user2, user5, group1 string) string {
 	return fmt.Sprintf(`
 	resource "looker_group" "target_group" {
 		name = "%s"
