@@ -7,3 +7,6 @@ terraform.tfstate.backup
 bin
 vendor
 build
+
+.DS_Store
+.idea
