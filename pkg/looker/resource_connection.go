@@ -539,22 +539,39 @@ func flattenConnection(connection apiclient.DBConnection, d *schema.ResourceData
 	if err := d.Set("after_connect_statements", connection.AfterConnectStatements); err != nil {
 		return err
 	}
+
 	if connection.PdtContextOverride != nil {
-		if err := d.Set("pdt_context_override", []map[string]interface{}{
-			{
-				"context":                  *connection.PdtContextOverride.Context,
-				"host":                     *connection.PdtContextOverride.Host,
-				"port":                     *connection.PdtContextOverride.Port,
-				"username":                 *connection.PdtContextOverride.Username,
-				"password":                 *connection.PdtContextOverride.Password,
-				"certitficate":             *connection.PdtContextOverride.Certificate,
-				"file_type":                *connection.PdtContextOverride.FileType,
-				"database":                 *connection.PdtContextOverride.Database,
-				"schema":                   *connection.PdtContextOverride.Schema,
-				"jdbc_additional_params":   *connection.PdtContextOverride.JdbcAdditionalParams,
-				"after_connect_statements": *connection.PdtContextOverride.AfterConnectStatements,
-			},
-		}); err != nil {
+		pdtContextOverride := make(map[string]interface{})
+
+		if connection.PdtContextOverride.Context != nil {
+			pdtContextOverride["context"] = *connection.PdtContextOverride.Context
+		}
+		if connection.PdtContextOverride.Host != nil {
+			pdtContextOverride["host"] = *connection.PdtContextOverride.Host
+		}
+		if connection.PdtContextOverride.Port != nil {
+			pdtContextOverride["port"] = *connection.PdtContextOverride.Port
+		}
+		if connection.PdtContextOverride.Username != nil {
+			pdtContextOverride["username"] = *connection.PdtContextOverride.Username
+		}
+		if connection.PdtContextOverride.Password != nil {
+			pdtContextOverride["password"] = *connection.PdtContextOverride.Password
+		}
+		if connection.PdtContextOverride.Certificate != nil {
+			pdtContextOverride["certificate"] = *connection.PdtContextOverride.Certificate
+		}
+		if connection.PdtContextOverride.FileType != nil {
+			pdtContextOverride["file_type"] = *connection.PdtContextOverride.FileType
+		}
+		if connection.PdtContextOverride.Database != nil {
+			pdtContextOverride["database"] = *connection.PdtContextOverride.Database
+		}
+		if connection.PdtContextOverride.Schema != nil {
+			pdtContextOverride["schema"] = *connection.PdtContextOverride.Schema
+		}
+
+		if err := d.Set("pdt_context_override", []map[string]interface{}{pdtContextOverride}); err != nil {
 			return err
 		}
 	}
