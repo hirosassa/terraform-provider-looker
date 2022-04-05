@@ -2,7 +2,6 @@ package looker
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"testing"
 
@@ -50,10 +49,7 @@ func testAccCheckGroupDestroy(s *terraform.State) error {
 			continue
 		}
 
-		groupID, err := strconv.ParseInt(rs.Primary.ID, 10, 64)
-		if err != nil {
-			return err
-		}
+		groupID := rs.Primary.ID
 
 		group, err := client.Group(groupID, "", nil)
 		if err != nil {

@@ -2,7 +2,6 @@ package looker
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"testing"
 
@@ -74,10 +73,7 @@ func testAccCheckGroupMembershipExists(n string) resource.TestCheckFunc {
 		}
 
 		client := testAccProvider.Meta().(*apiclient.LookerSDK)
-		targetGroupID, err := strconv.ParseInt(rs.Primary.ID, 10, 64)
-		if err != nil {
-			return err
-		}
+		targetGroupID := rs.Primary.ID
 
 		users, _ := client.AllGroupUsers(apiclient.RequestAllGroupUsers{GroupId: targetGroupID}, nil)
 
@@ -99,10 +95,7 @@ func testAccCheckGroupMembershipDestroy(s *terraform.State) error {
 			continue
 		}
 
-		targetGroupID, err := strconv.ParseInt(rs.Primary.ID, 10, 64)
-		if err != nil {
-			return err
-		}
+		targetGroupID := rs.Primary.ID
 
 		users, err := client.AllGroupUsers(apiclient.RequestAllGroupUsers{GroupId: targetGroupID}, nil)
 		if err != nil {

@@ -27,16 +27,16 @@ resource "looker_user_attribute" "my_user_attribute" {
 
 ### Required
 
-- **label** (String)
-- **name** (String)
-- **type** (String)
+- `label` (String)
+- `name` (String)
+- `type` (String)
 
 ### Optional
 
-- **default_value** (String)
-- **id** (String) The ID of this resource.
-- **user_can_edit** (Boolean)
-- **user_can_view** (Boolean)
-- **value_is_hidden** (Boolean)
+- `default_value` (String)
+- `id` (String) The ID of this resource.
+- `user_can_edit` (Boolean)
+- `user_can_view` (Boolean)
+- `value_is_hidden` (Boolean)
 
 

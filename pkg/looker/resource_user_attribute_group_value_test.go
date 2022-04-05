@@ -2,7 +2,6 @@ package looker
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"testing"
 
@@ -62,10 +61,7 @@ func testAccCheckUserAttributeGroupValueExists(n string) resource.TestCheckFunc 
 			return err
 		}
 
-		userAttributeID, err := strconv.ParseInt(userAttributeIDString, 10, 64)
-		if err != nil {
-			return err
-		}
+		userAttributeID := userAttributeIDString
 
 		client := testAccProvider.Meta().(*apiclient.LookerSDK)
 		userAttributeGroupValues, err := client.AllUserAttributeGroupValues(userAttributeID, "", nil)
@@ -89,12 +85,7 @@ func testAccCheckUserAttributeGroupValueDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, userAttributeIDString, err := parseTwoPartID(rs.Primary.ID)
-		if err != nil {
-			return err
-		}
-
-		userAttributeID, err := strconv.ParseInt(userAttributeIDString, 10, 64)
+		_, userAttributeID, err := parseTwoPartID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}

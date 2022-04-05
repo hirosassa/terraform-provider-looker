@@ -25,12 +25,12 @@ resource "looker_role" "role" {
 
 ### Required
 
-- **model_set_id** (String)
-- **name** (String)
-- **permission_set_id** (String)
+- `model_set_id` (String)
+- `name` (String)
+- `permission_set_id` (String)
 
 ### Optional
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 

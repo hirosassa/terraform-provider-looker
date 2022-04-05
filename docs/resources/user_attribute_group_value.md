@@ -25,12 +25,12 @@ resource "looker_user_attribute_group_value" "my_user_attribute_group_value" {
 
 ### Required
 
-- **group_id** (Number)
-- **user_attribute_id** (Number)
-- **value** (String)
+- `group_id` (Number)
+- `user_attribute_id` (Number)
+- `value` (String)
 
 ### Optional
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 

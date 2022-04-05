@@ -2,7 +2,6 @@ package looker
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"testing"
 
@@ -43,10 +42,7 @@ func testAccCheckUserRoleDestroy(s *terraform.State) error {
 			continue
 		}
 
-		userID, err := strconv.ParseInt(rs.Primary.ID, 10, 64)
-		if err != nil {
-			return err
-		}
+		userID := rs.Primary.ID
 
 		request := apiclient.RequestUserRoles{UserId: userID}
 

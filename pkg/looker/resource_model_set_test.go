@@ -2,7 +2,6 @@ package looker
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"testing"
 
@@ -52,10 +51,7 @@ func testAccCheckModelSetDestroy(s *terraform.State) error {
 			continue
 		}
 
-		modelSetID, err := strconv.ParseInt(rs.Primary.ID, 10, 64)
-		if err != nil {
-			return err
-		}
+		modelSetID := rs.Primary.ID
 
 		modelSet, err := client.ModelSet(modelSetID, "", nil)
 		if err != nil {

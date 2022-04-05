@@ -25,12 +25,12 @@ resource "looker_lookml_model" "lookml_model" {
 
 ### Required
 
-- **allowed_db_connection_names** (Set of String)
-- **name** (String)
-- **project_name** (String)
+- `allowed_db_connection_names` (Set of String)
+- `name` (String)
+- `project_name` (String)
 
 ### Optional
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 

@@ -24,11 +24,11 @@ resource "looker_model_set" "model_set" {
 
 ### Required
 
-- **models** (Set of String)
-- **name** (String)
+- `models` (Set of String)
+- `name` (String)
 
 ### Optional
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 

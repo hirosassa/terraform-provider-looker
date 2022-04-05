@@ -2,7 +2,6 @@ package looker
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -36,28 +35,20 @@ func resourceUserRoles() *schema.Resource {
 func resourceUserRolesCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
-	userIDString := d.Get("user_id").(string)
+	userID := d.Get("user_id").(string)
 
-	userID, err := strconv.ParseInt(userIDString, 10, 64)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	var roleIDs []int64
+	var roleIDs []string
 	for _, roleID := range d.Get("role_ids").(*schema.Set).List() {
-		rID, err := strconv.ParseInt(roleID.(string), 10, 64)
-		if err != nil {
-			return diag.FromErr(err)
-		}
+		rID := roleID.(string)
 		roleIDs = append(roleIDs, rID)
 	}
 
-	_, err = client.SetUserRoles(userID, roleIDs, "", nil)
+	_, err := client.SetUserRoles(userID, roleIDs, "", nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(userIDString)
+	d.SetId(userID)
 
 	return resourceUserRolesRead(ctx, d, m)
 }
@@ -65,10 +56,7 @@ func resourceUserRolesCreate(ctx context.Context, d *schema.ResourceData, m inte
 func resourceUserRolesRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
-	userID, err := strconv.ParseInt(d.Id(), 10, 64)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	userID := d.Id()
 
 	request := apiclient.RequestUserRoles{UserId: userID}
 
@@ -79,7 +67,7 @@ func resourceUserRolesRead(ctx context.Context, d *schema.ResourceData, m interf
 
 	var roleIDs []string
 	for _, role := range userRoles {
-		rID := strconv.Itoa(int(*role.Id))
+		rID := *role.Id
 		roleIDs = append(roleIDs, rID)
 	}
 
@@ -97,21 +85,15 @@ func resourceUserRolesRead(ctx context.Context, d *schema.ResourceData, m interf
 func resourceUserRolesUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
-	userID, err := strconv.ParseInt(d.Id(), 10, 64)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	userID := d.Id()
 
-	var roleIDs []int64
+	var roleIDs []string
 	for _, roleID := range d.Get("role_ids").(*schema.Set).List() {
-		rID, err := strconv.ParseInt(roleID.(string), 10, 64)
-		if err != nil {
-			return diag.FromErr(err)
-		}
+		rID := roleID.(string)
 		roleIDs = append(roleIDs, rID)
 	}
 
-	_, err = client.SetUserRoles(userID, roleIDs, "", nil)
+	_, err := client.SetUserRoles(userID, roleIDs, "", nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -122,13 +104,10 @@ func resourceUserRolesUpdate(ctx context.Context, d *schema.ResourceData, m inte
 func resourceUserRolesDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
-	userID, err := strconv.ParseInt(d.Id(), 10, 64)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	userID := d.Id()
 
-	roleIDs := []int64{}
-	_, err = client.SetUserRoles(userID, roleIDs, "", nil)
+	roleIDs := []string{}
+	_, err := client.SetUserRoles(userID, roleIDs, "", nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}

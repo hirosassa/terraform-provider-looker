@@ -24,11 +24,11 @@ resource "looker_user_roles" "user_roles" {
 
 ### Required
 
-- **role_ids** (Set of String)
-- **user_id** (String)
+- `role_ids` (Set of String)
+- `user_id` (String)
 
 ### Optional
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 

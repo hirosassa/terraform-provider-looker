@@ -2,7 +2,6 @@ package looker
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -21,43 +20,43 @@ func resourceGroupMembership() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"target_group_id": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Required: true,
 			},
 			"user_ids": {
 				Type:     schema.TypeSet,
 				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeInt},
-				Set:      schema.HashInt,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
 			},
 			"group_ids": {
 				Type:     schema.TypeSet,
 				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeInt},
-				Set:      schema.HashInt,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
 			},
 		},
 	}
 }
 
 func resourceGroupMembershipCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	targetGroupID := int64(d.Get("target_group_id").(int))
+	targetGroupID := d.Get("target_group_id").(string)
 
 	// add users
-	userIDs := expandInt64ListFromSet(d.Get("user_ids"))
+	userIDs := expandStringListFromSet(d.Get("user_ids"))
 	err := addGroupUsers(m, targetGroupID, userIDs)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// add groups
-	groupIDs := expandInt64ListFromSet(d.Get("group_ids"))
+	groupIDs := expandStringListFromSet(d.Get("group_ids"))
 	err = addGroupGroups(m, targetGroupID, groupIDs)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(strconv.Itoa(int(targetGroupID)))
+	d.SetId(targetGroupID)
 
 	return resourceGroupMembershipRead(ctx, d, m)
 }
@@ -65,7 +64,7 @@ func resourceGroupMembershipCreate(ctx context.Context, d *schema.ResourceData, 
 func resourceGroupMembershipRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
-	targetGroupID := int64(d.Get("target_group_id").(int))
+	targetGroupID := d.Get("target_group_id").(string)
 
 	req := apiclient.RequestAllGroupUsers{
 		GroupId: targetGroupID,
@@ -81,7 +80,7 @@ func resourceGroupMembershipRead(ctx context.Context, d *schema.ResourceData, m 
 		return diag.FromErr(err)
 	}
 
-	if err = d.Set("target_group_id", int(targetGroupID)); err != nil {
+	if err = d.Set("target_group_id", targetGroupID); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -97,12 +96,9 @@ func resourceGroupMembershipRead(ctx context.Context, d *schema.ResourceData, m 
 }
 
 func resourceGroupMembershipUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	targetGroupID, err := strconv.ParseInt(d.Id(), 10, 64)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	targetGroupID := d.Id()
 
-	err = removeAllUsersFromGroup(m, targetGroupID)
+	err := removeAllUsersFromGroup(m, targetGroupID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -112,13 +108,13 @@ func resourceGroupMembershipUpdate(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	userIDs := expandInt64ListFromSet(d.Get("user_ids"))
+	userIDs := expandStringListFromSet(d.Get("user_ids"))
 	err = addGroupUsers(m, targetGroupID, userIDs)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	groupIDs := expandInt64ListFromSet(d.Get("group_ids"))
+	groupIDs := expandStringListFromSet(d.Get("group_ids"))
 	err = addGroupGroups(m, targetGroupID, groupIDs)
 	if err != nil {
 		return diag.FromErr(err)
@@ -128,12 +124,9 @@ func resourceGroupMembershipUpdate(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceGroupMembershipDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	targetGroupID, err := strconv.ParseInt(d.Id(), 10, 64)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	targetGroupID := d.Id()
 
-	err = removeAllUsersFromGroup(m, targetGroupID)
+	err := removeAllUsersFromGroup(m, targetGroupID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -146,7 +139,7 @@ func resourceGroupMembershipDelete(ctx context.Context, d *schema.ResourceData, 
 	return resourceGroupMembershipRead(ctx, d, m)
 }
 
-func addGroupUsers(m interface{}, targetGroupID int64, userIDs []int64) error {
+func addGroupUsers(m interface{}, targetGroupID string, userIDs []string) error {
 	client := m.(*apiclient.LookerSDK)
 
 	for _, userID := range userIDs {
@@ -163,7 +156,7 @@ func addGroupUsers(m interface{}, targetGroupID int64, userIDs []int64) error {
 	return nil
 }
 
-func addGroupGroups(m interface{}, targetGroupID int64, groupIDs []int64) error {
+func addGroupGroups(m interface{}, targetGroupID string, groupIDs []string) error {
 	client := m.(*apiclient.LookerSDK)
 
 	for _, groupID := range groupIDs {
@@ -180,7 +173,7 @@ func addGroupGroups(m interface{}, targetGroupID int64, groupIDs []int64) error 
 	return nil
 }
 
-func removeAllUsersFromGroup(m interface{}, groupID int64) error {
+func removeAllUsersFromGroup(m interface{}, groupID string) error {
 	client := m.(*apiclient.LookerSDK)
 	req := apiclient.RequestAllGroupUsers{
 		GroupId: groupID,
@@ -201,7 +194,7 @@ func removeAllUsersFromGroup(m interface{}, groupID int64) error {
 	return nil
 }
 
-func removeAllGroupsFromGroup(m interface{}, groupID int64) error {
+func removeAllGroupsFromGroup(m interface{}, groupID string) error {
 	client := m.(*apiclient.LookerSDK)
 	groups, err := client.AllGroupGroups(groupID, "", nil) // todo: imeplement paging
 	if err != nil {
@@ -218,18 +211,18 @@ func removeAllGroupsFromGroup(m interface{}, groupID int64) error {
 	return nil
 }
 
-func flattenUserIDs(users []apiclient.User) []int {
-	userIDs := make([]int, 0, len(users))
+func flattenUserIDs(users []apiclient.User) []string {
+	userIDs := make([]string, 0, len(users))
 	for _, user := range users {
-		userIDs = append(userIDs, int(*user.Id))
+		userIDs = append(userIDs, *user.Id)
 	}
 	return userIDs
 }
 
-func flattenGroupIDs(groups []apiclient.Group) []int {
-	groupIDs := make([]int, 0, len(groups))
+func flattenGroupIDs(groups []apiclient.Group) []string {
+	groupIDs := make([]string, 0, len(groups))
 	for _, group := range groups {
-		groupIDs = append(groupIDs, int(*group.Id))
+		groupIDs = append(groupIDs, *group.Id)
 	}
 	return groupIDs
 }

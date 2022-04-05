@@ -2,7 +2,6 @@ package looker
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -54,7 +53,7 @@ func resourcePermissionSetCreate(ctx context.Context, d *schema.ResourceData, m 
 	}
 
 	permissionSetID := *permissionSet.Id
-	d.SetId(strconv.Itoa(int(permissionSetID)))
+	d.SetId(permissionSetID)
 
 	return resourcePermissionSetRead(ctx, d, m)
 }
@@ -62,10 +61,7 @@ func resourcePermissionSetCreate(ctx context.Context, d *schema.ResourceData, m 
 func resourcePermissionSetRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
-	permissionSetID, err := strconv.ParseInt(d.Id(), 10, 64)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	permissionSetID := d.Id()
 
 	permissionSet, err := client.PermissionSet(permissionSetID, "", nil)
 	if err != nil {
@@ -84,10 +80,7 @@ func resourcePermissionSetRead(ctx context.Context, d *schema.ResourceData, m in
 func resourcePermissionSetUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
-	permissionSetID, err := strconv.ParseInt(d.Id(), 10, 64)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	permissionSetID := d.Id()
 
 	permissionSetName := d.Get("name").(string)
 	var permissions []string
@@ -98,7 +91,7 @@ func resourcePermissionSetUpdate(ctx context.Context, d *schema.ResourceData, m 
 		Name:        &permissionSetName,
 		Permissions: &permissions,
 	}
-	_, err = client.UpdatePermissionSet(permissionSetID, writePermissionSet, nil)
+	_, err := client.UpdatePermissionSet(permissionSetID, writePermissionSet, nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -109,12 +102,9 @@ func resourcePermissionSetUpdate(ctx context.Context, d *schema.ResourceData, m 
 func resourcePermissionSetDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
-	permissionSetID, err := strconv.ParseInt(d.Id(), 10, 64)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	permissionSetID := d.Id()
 
-	_, err = client.DeletePermissionSet(permissionSetID, nil)
+	_, err := client.DeletePermissionSet(permissionSetID, nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -2,7 +2,6 @@ package looker
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -42,7 +41,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, m interfac
 	}
 
 	groupID := *group.Id
-	d.SetId(strconv.Itoa(int(groupID)))
+	d.SetId(groupID)
 
 	return resourceGroupRead(ctx, d, m)
 }
@@ -50,10 +49,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, m interfac
 func resourceGroupRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
-	groupID, err := strconv.ParseInt(d.Id(), 10, 64)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	groupID := d.Id()
 
 	group, err := client.Group(groupID, "", nil)
 	if err != nil {
@@ -70,16 +66,13 @@ func resourceGroupRead(ctx context.Context, d *schema.ResourceData, m interface{
 func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
-	groupID, err := strconv.ParseInt(d.Id(), 10, 64)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	groupID := d.Id()
 
 	groupName := d.Get("name").(string)
 	writeGroup := apiclient.WriteGroup{
 		Name: &groupName,
 	}
-	_, err = client.UpdateGroup(groupID, writeGroup, "", nil)
+	_, err := client.UpdateGroup(groupID, writeGroup, "", nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -90,12 +83,9 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 func resourceGroupDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
-	groupID, err := strconv.ParseInt(d.Id(), 10, 64)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	groupID := d.Id()
 
-	_, err = client.DeleteGroup(groupID, nil)
+	_, err := client.DeleteGroup(groupID, nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}

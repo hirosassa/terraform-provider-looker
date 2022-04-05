@@ -2,7 +2,6 @@ package looker
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"testing"
 
@@ -52,10 +51,7 @@ func testAccCheckPermissionSetDestroy(s *terraform.State) error {
 			continue
 		}
 
-		permissionSetID, err := strconv.ParseInt(rs.Primary.ID, 10, 64)
-		if err != nil {
-			return err
-		}
+		permissionSetID := rs.Primary.ID
 
 		permissionSet, err := client.PermissionSet(permissionSetID, "", nil)
 		if err != nil {

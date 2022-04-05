@@ -44,10 +44,10 @@ func flattenStringListToSet(strings []string) *schema.Set {
 	return schema.NewSet(schema.HashString, flattenStringList(strings))
 }
 
-func expandInt64ListFromSet(set interface{}) []int64 {
-	var ints []int64
-	for _, v := range set.(*schema.Set).List() {
-		ints = append(ints, int64(v.(int)))
-	}
-	return ints
-}
+// func expandInt64ListFromSet(set interface{}) []int64 {
+// 	var ints []int64
+// 	for _, v := range set.(*schema.Set).List() {
+// 		ints = append(ints, int64(v.(int)))
+// 	}
+// 	return ints
+// }

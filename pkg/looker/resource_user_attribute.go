@@ -2,7 +2,6 @@ package looker
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -63,9 +62,9 @@ func resourceUserAttributeCreate(ctx context.Context, d *schema.ResourceData, m 
 	userAttributeUserCanEdit := d.Get("user_can_edit").(bool)
 
 	writeUserAttribute := apiclient.WriteUserAttribute{
-		Name:          &userAttributeName,
-		Label:         &userAttributeLabel,
-		Type:          &userAttributeType,
+		Name:          userAttributeName,
+		Label:         userAttributeLabel,
+		Type:          userAttributeType,
 		DefaultValue:  &userAttributeDefaultValue,
 		ValueIsHidden: &userAttributeValueIsHidden,
 		UserCanView:   &userAttributeUserCanView,
@@ -78,7 +77,7 @@ func resourceUserAttributeCreate(ctx context.Context, d *schema.ResourceData, m 
 	}
 
 	userAttributeID := *userAttribute.Id
-	d.SetId(strconv.Itoa(int(userAttributeID)))
+	d.SetId(userAttributeID)
 
 	return resourceUserAttributeRead(ctx, d, m)
 }
@@ -86,10 +85,7 @@ func resourceUserAttributeCreate(ctx context.Context, d *schema.ResourceData, m 
 func resourceUserAttributeRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
-	userAttributeID, err := strconv.ParseInt(d.Id(), 10, 64)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	userAttributeID := d.Id()
 
 	userAttribute, err := client.UserAttribute(userAttributeID, "", nil)
 	if err != nil {
@@ -124,10 +120,7 @@ func resourceUserAttributeRead(ctx context.Context, d *schema.ResourceData, m in
 func resourceUserAttributeUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
-	userAttributeID, err := strconv.ParseInt(d.Id(), 10, 64)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	userAttributeID := d.Id()
 
 	userAttributeName := d.Get("name").(string)
 	userAttributeType := d.Get("type").(string)
@@ -138,16 +131,16 @@ func resourceUserAttributeUpdate(ctx context.Context, d *schema.ResourceData, m 
 	userAttributeUserCanEdit := d.Get("user_can_edit").(bool)
 
 	writeUserAttribute := apiclient.WriteUserAttribute{
-		Name:          &userAttributeName,
-		Label:         &userAttributeLabel,
-		Type:          &userAttributeType,
+		Name:          userAttributeName,
+		Label:         userAttributeLabel,
+		Type:          userAttributeType,
 		DefaultValue:  &userAttributeDefaultValue,
 		ValueIsHidden: &userAttributeValueIsHidden,
 		UserCanView:   &userAttributeUserCanView,
 		UserCanEdit:   &userAttributeUserCanEdit,
 	}
 
-	_, err = client.UpdateUserAttribute(userAttributeID, writeUserAttribute, "", nil)
+	_, err := client.UpdateUserAttribute(userAttributeID, writeUserAttribute, "", nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -158,12 +151,9 @@ func resourceUserAttributeUpdate(ctx context.Context, d *schema.ResourceData, m 
 func resourceUserAttributeDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
-	userAttributeID, err := strconv.ParseInt(d.Id(), 10, 64)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	userAttributeID := d.Id()
 
-	_, err = client.DeleteUserAttribute(userAttributeID, nil)
+	_, err := client.DeleteUserAttribute(userAttributeID, nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}

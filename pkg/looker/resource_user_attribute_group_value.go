@@ -2,7 +2,6 @@ package looker
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -39,8 +38,8 @@ func resourceUserAttributeGroupValue() *schema.Resource {
 func resourceUserAttributeGroupValueCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
-	groupID := int64(d.Get("group_id").(int))
-	userAttributeID := int64(d.Get("user_attribute_id").(int))
+	groupID := d.Get("group_id").(string)
+	userAttributeID := d.Get("user_attribute_id").(string)
 	value := d.Get("value").(string)
 
 	body := apiclient.UserAttributeGroupValue{
@@ -53,8 +52,8 @@ func resourceUserAttributeGroupValueCreate(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	groupIDString := strconv.Itoa(int(*userAttributeGroupValue.GroupId))
-	userAttributeIDString := strconv.Itoa(int(*userAttributeGroupValue.UserAttributeId))
+	groupIDString := *userAttributeGroupValue.GroupId
+	userAttributeIDString := *userAttributeGroupValue.UserAttributeId
 	id := buildTwoPartID(&groupIDString, &userAttributeIDString)
 
 	d.SetId(id)
@@ -65,15 +64,7 @@ func resourceUserAttributeGroupValueCreate(ctx context.Context, d *schema.Resour
 func resourceUserAttributeGroupValueRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
-	groupIDString, userAttributeIDString, err := parseTwoPartID(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	groupID, err := strconv.ParseInt(groupIDString, 10, 64)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	userAttributeID, err := strconv.ParseInt(userAttributeIDString, 10, 64)
+	groupID, userAttributeID, err := parseTwoPartID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -107,15 +98,7 @@ func resourceUserAttributeGroupValueRead(ctx context.Context, d *schema.Resource
 func resourceUserAttributeGroupValueUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
-	groupIDString, userAttributeIDString, err := parseTwoPartID(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	groupID, err := strconv.ParseInt(groupIDString, 10, 64)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	userAttributeID, err := strconv.ParseInt(userAttributeIDString, 10, 64)
+	groupID, userAttributeID, err := parseTwoPartID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -138,15 +121,7 @@ func resourceUserAttributeGroupValueUpdate(ctx context.Context, d *schema.Resour
 func resourceUserAttributeGroupValueDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
-	groupIDString, userAttributeIDString, err := parseTwoPartID(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	groupID, err := strconv.ParseInt(groupIDString, 10, 64)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	userAttributeID, err := strconv.ParseInt(userAttributeIDString, 10, 64)
+	groupID, userAttributeID, err := parseTwoPartID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}

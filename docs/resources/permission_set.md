@@ -24,11 +24,11 @@ resource "looker_permission_set" "permission_set" {
 
 ### Required
 
-- **name** (String)
-- **permissions** (Set of String)
+- `name` (String)
+- `permissions` (Set of String)
 
 ### Optional
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 

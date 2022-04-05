@@ -2,7 +2,6 @@ package looker
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"testing"
 
@@ -60,22 +59,12 @@ func testAccCheckUserAttributeUserValueExists(n string) resource.TestCheckFunc {
 		}
 
 		client := testAccProvider.Meta().(*apiclient.LookerSDK)
-		userIDString, userAttributeIDString, err := parseTwoPartID(rs.Primary.ID)
+		userID, userAttributeID, err := parseTwoPartID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
-		userID, err := strconv.ParseInt(userIDString, 10, 64)
-		if err != nil {
-			return err
-		}
-
-		userAttributeID, err := strconv.ParseInt(userAttributeIDString, 10, 64)
-		if err != nil {
-			return err
-		}
-
-		userAttributeIDs := rtl.DelimInt64{userAttributeID}
+		userAttributeIDs := rtl.DelimString{userAttributeID}
 		request := apiclient.RequestUserAttributeUserValues{
 			UserId:           userID,
 			UserAttributeIds: &userAttributeIDs,
@@ -98,22 +87,12 @@ func testAccCheckUserAttributeUserValueDestroy(s *terraform.State) error {
 			continue
 		}
 
-		userIDString, userAttributeIDString, err := parseTwoPartID(rs.Primary.ID)
+		userID, userAttributeID, err := parseTwoPartID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
-		userID, err := strconv.ParseInt(userIDString, 10, 64)
-		if err != nil {
-			return err
-		}
-
-		userAttributeID, err := strconv.ParseInt(userAttributeIDString, 10, 64)
-		if err != nil {
-			return err
-		}
-
-		userAttributeIDs := rtl.DelimInt64{userAttributeID}
+		userAttributeIDs := rtl.DelimString{userAttributeID}
 		request := apiclient.RequestUserAttributeUserValues{
 			UserId:           userID,
 			UserAttributeIds: &userAttributeIDs,
