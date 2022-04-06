@@ -9,7 +9,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 )
 
-replace github.com/looker-open-source/sdk-codegen/go => ../sdk-codegen/go
+replace github.com/looker-open-source/sdk-codegen/go => github.com/hirosassa/sdk-codegen/go v0.0.2-0.20220405051148-f906184facec
 
 require (
 	github.com/Masterminds/goutils v1.1.0 // indirect
