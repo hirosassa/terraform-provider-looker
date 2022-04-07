@@ -3,7 +3,6 @@
 page_title: "looker_user_attribute_group_value Resource - terraform-provider-looker"
 subcategory: ""
 description: |-
-
 ---
 
 # looker_user_attribute_group_value (Resource)
