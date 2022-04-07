@@ -24,7 +24,7 @@ func resourceUserAttributeGroupValue() *schema.Resource {
 				Required: true,
 			},
 			"group_id": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Required: true,
 			},
 			"value": {

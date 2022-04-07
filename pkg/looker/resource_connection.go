@@ -35,7 +35,7 @@ func resourceConnection() *schema.Resource {
 				Required: true,
 			},
 			"port": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"username": {
@@ -231,7 +231,7 @@ func resourceConnection() *schema.Resource {
 				},
 			},
 			"oauth_application_id": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Optional: true,
 			},
 		},
