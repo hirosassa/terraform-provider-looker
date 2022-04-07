@@ -3,7 +3,7 @@
 page_title: "looker_user_attribute_group_value Resource - terraform-provider-looker"
 subcategory: ""
 description: |-
-  
+
 ---
 
 # looker_user_attribute_group_value (Resource)
@@ -26,7 +26,7 @@ resource "looker_user_attribute_group_value" "my_user_attribute_group_value" {
 ### Required
 
 - `group_id` (String)
-- `user_attribute_id` (Number)
+- `user_attribute_id` (String)
 - `value` (String)
 
 ### Optional

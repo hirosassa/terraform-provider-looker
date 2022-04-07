@@ -20,7 +20,7 @@ func resourceUserAttributeGroupValue() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"user_attribute_id": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Required: true,
 			},
 			"group_id": {
