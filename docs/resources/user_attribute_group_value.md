@@ -25,7 +25,7 @@ resource "looker_user_attribute_group_value" "my_user_attribute_group_value" {
 
 ### Required
 
-- `group_id` (Number)
+- `group_id` (String)
 - `user_attribute_id` (Number)
 - `value` (String)
 
