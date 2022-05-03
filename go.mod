@@ -5,11 +5,9 @@ go 1.17
 require (
 	github.com/hashicorp/terraform-plugin-docs v0.7.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.13.0
-	github.com/looker-open-source/sdk-codegen/go v0.0.2-0.20220324185106-8f79913c70dc
+	github.com/looker-open-source/sdk-codegen/go v0.0.2-0.20220425180701-d51a6750f7d5
 	github.com/stretchr/testify v1.7.0
 )
-
-replace github.com/looker-open-source/sdk-codegen/go => github.com/hirosassa/sdk-codegen/go v0.0.2-0.20220405051148-f906184facec
 
 require (
 	github.com/Masterminds/goutils v1.1.0 // indirect
@@ -67,9 +65,10 @@ require (
 	github.com/vmihailenco/tagparser v0.1.1 // indirect
 	github.com/zclconf/go-cty v1.10.0 // indirect
 	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e // indirect
-	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect
-	golang.org/x/sys v0.0.0-20210927094055-39ccf1dd6fa6 // indirect
-	golang.org/x/text v0.3.6 // indirect
+	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd // indirect
+	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5 // indirect
+	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
+	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.6 // indirect
 	google.golang.org/genproto v0.0.0-20200904004341-0bd0a958aa1d // indirect
 	google.golang.org/grpc v1.45.0 // indirect
