@@ -2,6 +2,7 @@ package looker
 
 import (
 	"context"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -70,6 +71,8 @@ func resourceUserAttributeCreate(ctx context.Context, d *schema.ResourceData, m 
 		UserCanView:   &userAttributeUserCanView,
 		UserCanEdit:   &userAttributeUserCanEdit,
 	}
+
+	log.Printf("[DEBUG] Create user attribute %s", userAttributeName)
 
 	userAttribute, err := client.CreateUserAttribute(writeUserAttribute, "", nil)
 	if err != nil {
@@ -140,6 +143,8 @@ func resourceUserAttributeUpdate(ctx context.Context, d *schema.ResourceData, m 
 		UserCanEdit:   &userAttributeUserCanEdit,
 	}
 
+	log.Printf("[DEBUG] Update user attribute %s", userAttributeID)
+
 	_, err := client.UpdateUserAttribute(userAttributeID, writeUserAttribute, "", nil)
 	if err != nil {
 		return diag.FromErr(err)
@@ -152,6 +157,8 @@ func resourceUserAttributeDelete(ctx context.Context, d *schema.ResourceData, m 
 	client := m.(*apiclient.LookerSDK)
 
 	userAttributeID := d.Id()
+
+	log.Printf("[DEBUG] Delete user attribute %s", userAttributeID)
 
 	_, err := client.DeleteUserAttribute(userAttributeID, nil)
 	if err != nil {

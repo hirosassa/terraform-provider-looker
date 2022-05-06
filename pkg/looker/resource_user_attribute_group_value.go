@@ -2,6 +2,7 @@ package looker
 
 import (
 	"context"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -42,6 +43,8 @@ func resourceUserAttributeGroupValueCreate(ctx context.Context, d *schema.Resour
 	userAttributeID := d.Get("user_attribute_id").(string)
 	value := d.Get("value").(string)
 
+	log.Printf("[DEBUG] Create user attribute group value %s for %s by %s", userAttributeID, groupID, value)
+
 	body := apiclient.UserAttributeGroupValue{
 		GroupId:         &groupID,
 		UserAttributeId: &userAttributeID,
@@ -68,6 +71,8 @@ func resourceUserAttributeGroupValueRead(ctx context.Context, d *schema.Resource
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
+	log.Printf("[DEBUG] Read user attribute group value %s for %s", userAttributeID, groupID)
 
 	userAttributeGroupValues, err := client.AllUserAttributeGroupValues(userAttributeID, "", nil)
 	if err != nil {
@@ -105,6 +110,8 @@ func resourceUserAttributeGroupValueUpdate(ctx context.Context, d *schema.Resour
 
 	value := d.Get("value").(string)
 
+	log.Printf("[DEBUG] Update user attribute group value %s for %s by %s", userAttributeID, groupID, value)
+
 	body := apiclient.UserAttributeGroupValue{
 		GroupId:         &groupID,
 		UserAttributeId: &userAttributeID,
@@ -126,8 +133,11 @@ func resourceUserAttributeGroupValueDelete(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
+	log.Printf("[DEBUG] Delete user attribute group value %s for %s", userAttributeID, groupID)
+
 	err = client.DeleteUserAttributeGroupValue(groupID, userAttributeID, nil)
 	if err != nil {
+		log.Printf("[DEBUG] %+v", err)
 		return diag.FromErr(err)
 	}
 
