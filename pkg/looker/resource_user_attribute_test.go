@@ -42,7 +42,7 @@ func TestAcc_UserAttribute(t *testing.T) {
 				ImportStateVerify: true,
 			},
 		},
-		CheckDestroy: testAccCheckUserAttributeGroupValueDestroy,
+		CheckDestroy: testAccCheckUserAttributeDestroy,
 	})
 }
 
@@ -84,7 +84,7 @@ func TestAcc_UserAttributeWithDefaultValue(t *testing.T) {
 				ImportStateVerify: true,
 			},
 		},
-		CheckDestroy: testAccCheckUserAttributeGroupValueDestroy,
+		CheckDestroy: testAccCheckUserAttributeDestroy,
 	})
 }
 
