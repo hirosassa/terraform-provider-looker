@@ -12,8 +12,8 @@ import (
 )
 
 func TestAcc_UserAttribute(t *testing.T) {
-	name1 := strings.ToUpper(acctest.RandStringFromCharSet(10, acctest.CharSetAlpha))
-	name2 := strings.ToUpper(acctest.RandStringFromCharSet(10, acctest.CharSetAlpha))
+	name1 := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	name2 := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -47,9 +47,9 @@ func TestAcc_UserAttribute(t *testing.T) {
 }
 
 func TestAcc_UserAttributeWithDefaultValue(t *testing.T) {
-	name := strings.ToUpper(acctest.RandStringFromCharSet(10, acctest.CharSetAlpha))
-	type1 := "string"
-	type2 := "number"
+	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	type1 := "advanced_filter_string"
+	type2 := "advanced_filter_number"
 	defaultValue1 := "%, NULL"
 	defaultValue2 := "<0, >=0, NULL"
 
@@ -61,25 +61,25 @@ func TestAcc_UserAttributeWithDefaultValue(t *testing.T) {
 			{
 				Config: userAttributeConfigWithDefaultValue(name, type1, defaultValue1),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckUserAttributeExists("looker_user_attribute.test"),
-					resource.TestCheckResourceAttr("looker_user_attribute.test", "name", name),
-					resource.TestCheckResourceAttr("looker_user_attribute.test", "type", type1),
-					resource.TestCheckResourceAttr("looker_user_attribute.test", "default_value", defaultValue1),
+					testAccCheckUserAttributeExists("looker_user_attribute.test_with_default"),
+					resource.TestCheckResourceAttr("looker_user_attribute.test_with_default", "name", name),
+					resource.TestCheckResourceAttr("looker_user_attribute.test_with_default", "type", type1),
+					resource.TestCheckResourceAttr("looker_user_attribute.test_with_default", "default_value", defaultValue1),
 				),
 			},
 			// Test: Update
 			{
 				Config: userAttributeConfigWithDefaultValue(name, type2, defaultValue2),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckUserAttributeGroupValueExists("looker_user_attribute.test"),
-					resource.TestCheckResourceAttr("looker_user_attribute.test", "name", name),
-					resource.TestCheckResourceAttr("looker_user_attribute.test", "type", type2),
-					resource.TestCheckResourceAttr("looker_user_attribute.test", "default_value", defaultValue2),
+					testAccCheckUserAttributeExists("looker_user_attribute.test_with_default"),
+					resource.TestCheckResourceAttr("looker_user_attribute.test_with_default", "name", name),
+					resource.TestCheckResourceAttr("looker_user_attribute.test_with_default", "type", type2),
+					resource.TestCheckResourceAttr("looker_user_attribute.test_with_default", "default_value", defaultValue2),
 				),
 			},
 			// Test: Import
 			{
-				ResourceName:      "looker_user_attribute.test",
+				ResourceName:      "looker_user_attribute.test_with_default",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},

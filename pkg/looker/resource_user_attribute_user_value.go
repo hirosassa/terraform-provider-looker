@@ -21,11 +21,11 @@ func resourceUserAttributeUserValue() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"user_id": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Required: true,
 			},
 			"user_attribute_id": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Required: true,
 			},
 			"value": {
