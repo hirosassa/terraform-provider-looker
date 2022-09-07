@@ -326,7 +326,7 @@ func expandWriteDBConnection(d *schema.ResourceData) (*apiclient.WriteDBConnecti
 
 	// optional values
 	if v, ok := d.GetOk("port"); ok {
-		port := v.(string)  // for api breaking change
+		port := v.(string) // for api breaking change
 		writeDBConnection.Port = &port
 	}
 	if v, ok := d.GetOk("password"); ok {
@@ -415,7 +415,7 @@ func expandWriteDBConnection(d *schema.ResourceData) (*apiclient.WriteDBConnecti
 		writeDBConnection.DisableContextComment = &disable_context_comment
 	}
 	if v, ok := d.GetOk("oauth_application_id"); ok {
-		oauthApplicationId := v.(string)  // for api breaking change
+		oauthApplicationId := v.(string) // for api breaking change
 		writeDBConnection.OauthApplicationId = &oauthApplicationId
 	}
 

@@ -65,7 +65,6 @@ func testAccCheckGroupDestroy(s *terraform.State) error {
 	}
 
 	return nil
-
 }
 
 func groupConfig(name string) string {

@@ -7,8 +7,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-var testAccProviders map[string]*schema.Provider
-var testAccProvider *schema.Provider
+var (
+	testAccProviders map[string]*schema.Provider
+	testAccProvider  *schema.Provider
+)
 
 func init() {
 	testAccProvider = Provider()

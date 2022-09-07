@@ -50,13 +50,14 @@ func testAccCheckConnectionExists(n string) resource.TestCheckFunc {
 		connectionName := rs.Primary.ID
 
 		_, err := client.Connection(connectionName, "", nil)
-		if err !=nil {
+		if err != nil {
 			return err
 		}
 
 		return nil
 	}
 }
+
 func testAccCheckConnectionDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*apiclient.LookerSDK)
 
