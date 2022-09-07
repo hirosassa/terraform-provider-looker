@@ -33,6 +33,10 @@ func resourceUser() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"is_disabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -42,10 +46,12 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface
 	firstName := d.Get("first_name").(string)
 	lastName := d.Get("last_name").(string)
 	email := d.Get("email").(string)
+	isDisabled := d.Get("is_disabled").(bool)
 
 	writeUser := apiclient.WriteUser{
-		FirstName: &firstName,
-		LastName:  &lastName,
+		FirstName:  &firstName,
+		LastName:   &lastName,
+		IsDisabled: &isDisabled,
 	}
 
 	// CreateUser sometimes returns 500 error
@@ -103,6 +109,9 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}
 	if err = d.Set("last_name", user.LastName); err != nil {
 		return diag.FromErr(err)
 	}
+	if err = d.Set("is_disabled", user.IsDisabled); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -112,12 +121,14 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface
 
 	userID := d.Id()
 
-	if d.HasChanges("first_name", "last_name") {
+	if d.HasChanges("first_name", "last_name", "is_disabled") {
 		firstName := d.Get("first_name").(string)
 		lastName := d.Get("last_name").(string)
+		isDisabled := d.Get("is_disabled").(bool)
 		writeUser := apiclient.WriteUser{
-			FirstName: &firstName,
-			LastName:  &lastName,
+			FirstName:  &firstName,
+			LastName:   &lastName,
+			IsDisabled: &isDisabled,
 		}
 		_, err := client.UpdateUser(userID, writeUser, "", nil)
 		if err != nil {

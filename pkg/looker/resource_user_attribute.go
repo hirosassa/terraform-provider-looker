@@ -48,6 +48,11 @@ func resourceUserAttribute() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			"hidden_value_domain_whitelist": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 		},
 	}
 }
@@ -61,15 +66,17 @@ func resourceUserAttributeCreate(ctx context.Context, d *schema.ResourceData, m 
 	userAttributeValueIsHidden := d.Get("value_is_hidden").(bool)
 	userAttributeUserCanView := d.Get("user_can_view").(bool)
 	userAttributeUserCanEdit := d.Get("user_can_edit").(bool)
+	userAttributeHiddenValueDomainWhitelist := d.Get("hidden_value_domain_whitelist").(string)
 
 	writeUserAttribute := apiclient.WriteUserAttribute{
-		Name:          userAttributeName,
-		Label:         userAttributeLabel,
-		Type:          userAttributeType,
-		DefaultValue:  &userAttributeDefaultValue,
-		ValueIsHidden: &userAttributeValueIsHidden,
-		UserCanView:   &userAttributeUserCanView,
-		UserCanEdit:   &userAttributeUserCanEdit,
+		Name:                       userAttributeName,
+		Label:                      userAttributeLabel,
+		Type:                       userAttributeType,
+		DefaultValue:               &userAttributeDefaultValue,
+		ValueIsHidden:              &userAttributeValueIsHidden,
+		UserCanView:                &userAttributeUserCanView,
+		UserCanEdit:                &userAttributeUserCanEdit,
+		HiddenValueDomainWhitelist: &userAttributeHiddenValueDomainWhitelist,
 	}
 
 	log.Printf("[DEBUG] Create user attribute %s", userAttributeName)
@@ -116,6 +123,9 @@ func resourceUserAttributeRead(ctx context.Context, d *schema.ResourceData, m in
 	if err = d.Set("user_can_edit", userAttribute.UserCanEdit); err != nil {
 		return diag.FromErr(err)
 	}
+	if err = d.Set("hidden_value_domain_whitelist", userAttribute.HiddenValueDomainWhitelist); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -132,15 +142,17 @@ func resourceUserAttributeUpdate(ctx context.Context, d *schema.ResourceData, m 
 	userAttributeValueIsHidden := d.Get("value_is_hidden").(bool)
 	userAttributeUserCanView := d.Get("user_can_view").(bool)
 	userAttributeUserCanEdit := d.Get("user_can_edit").(bool)
+	userAttributeHiddenValueDomainWhitelist := d.Get("hidden_value_domain_whitelist").(string)
 
 	writeUserAttribute := apiclient.WriteUserAttribute{
-		Name:          userAttributeName,
-		Label:         userAttributeLabel,
-		Type:          userAttributeType,
-		DefaultValue:  &userAttributeDefaultValue,
-		ValueIsHidden: &userAttributeValueIsHidden,
-		UserCanView:   &userAttributeUserCanView,
-		UserCanEdit:   &userAttributeUserCanEdit,
+		Name:                       userAttributeName,
+		Label:                      userAttributeLabel,
+		Type:                       userAttributeType,
+		DefaultValue:               &userAttributeDefaultValue,
+		ValueIsHidden:              &userAttributeValueIsHidden,
+		UserCanView:                &userAttributeUserCanView,
+		UserCanEdit:                &userAttributeUserCanEdit,
+		HiddenValueDomainWhitelist: &userAttributeHiddenValueDomainWhitelist,
 	}
 
 	log.Printf("[DEBUG] Update user attribute %s", userAttributeID)

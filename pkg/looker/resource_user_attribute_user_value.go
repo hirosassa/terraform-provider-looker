@@ -2,6 +2,7 @@ package looker
 
 import (
 	"context"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -124,13 +125,11 @@ func resourceUserAttributeUserValueDelete(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(err)
 	}
 
-	body := apiclient.WriteUserAttributeWithValue{
-		Value: nil,
-	}
+	log.Printf("[DEBUG] Delete user attribute user value %s for %s", userAttributeID, userID)
 
-	// fill the target value null
-	_, err = client.SetUserAttributeUserValue(userID, userAttributeID, body, nil)
+	err = client.DeleteUserAttributeUserValue(userID, userAttributeID, nil)
 	if err != nil {
+		log.Printf("[DEBUG] %+v", err)
 		return diag.FromErr(err)
 	}
 
