@@ -80,9 +80,7 @@ func resourceUserAttributeCreate(ctx context.Context, d *schema.ResourceData, m 
 	}
 
 	if userAttributeValueIsHidden && userAttributeHiddenValueDomainWhitelist != "" {
-
 		writeUserAttribute.HiddenValueDomainWhitelist = &userAttributeHiddenValueDomainWhitelist
-
 	}
 
 	log.Printf("[DEBUG] Create user attribute %s", userAttributeName)
