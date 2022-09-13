@@ -11,7 +11,7 @@ terraform {
   required_providers {
     looker = {
       source = "hirosassa/looker"
-      version = "0.8.7"
+      version = "0.8.8"
     }
   }
 }
