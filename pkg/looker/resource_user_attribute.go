@@ -159,9 +159,7 @@ func resourceUserAttributeUpdate(ctx context.Context, d *schema.ResourceData, m 
 	}
 
 	if userAttributeValueIsHidden && userAttributeHiddenValueDomainWhitelist != "" {
-
 		writeUserAttribute.HiddenValueDomainWhitelist = &userAttributeHiddenValueDomainWhitelist
-
 	}
 
 	log.Printf("[DEBUG] Update user attribute %s", userAttributeID)
