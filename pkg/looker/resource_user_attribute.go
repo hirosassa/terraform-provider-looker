@@ -39,6 +39,7 @@ func resourceUserAttribute() *schema.Resource {
 			"value_is_hidden": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				ForceNew: true,
 			},
 			"user_can_view": {
 				Type:     schema.TypeBool,
@@ -76,7 +77,12 @@ func resourceUserAttributeCreate(ctx context.Context, d *schema.ResourceData, m 
 		ValueIsHidden:              &userAttributeValueIsHidden,
 		UserCanView:                &userAttributeUserCanView,
 		UserCanEdit:                &userAttributeUserCanEdit,
-		HiddenValueDomainWhitelist: &userAttributeHiddenValueDomainWhitelist,
+	}
+
+	if userAttributeValueIsHidden && userAttributeHiddenValueDomainWhitelist != "" {
+
+		writeUserAttribute.HiddenValueDomainWhitelist = &userAttributeHiddenValueDomainWhitelist
+
 	}
 
 	log.Printf("[DEBUG] Create user attribute %s", userAttributeName)
@@ -152,7 +158,12 @@ func resourceUserAttributeUpdate(ctx context.Context, d *schema.ResourceData, m 
 		ValueIsHidden:              &userAttributeValueIsHidden,
 		UserCanView:                &userAttributeUserCanView,
 		UserCanEdit:                &userAttributeUserCanEdit,
-		HiddenValueDomainWhitelist: &userAttributeHiddenValueDomainWhitelist,
+	}
+
+	if userAttributeValueIsHidden && userAttributeHiddenValueDomainWhitelist != "" {
+
+		writeUserAttribute.HiddenValueDomainWhitelist = &userAttributeHiddenValueDomainWhitelist
+
 	}
 
 	log.Printf("[DEBUG] Update user attribute %s", userAttributeID)
