@@ -59,6 +59,7 @@ resource "looker_connection" "snowflake_connection" {
 - `db_timezone` (String)
 - `disable_context_comment` (Boolean)
 - `file_type` (String) Certificate key file type (.json or .p12).
+- `id` (String) The ID of this resource.
 - `jdbc_additional_params` (String)
 - `maintenance_cron` (String)
 - `max_billing_gigabytes` (String)
