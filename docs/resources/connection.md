@@ -80,10 +80,6 @@ resource "looker_connection" "snowflake_connection" {
 - `user_db_credentials` (Boolean)
 - `verify_ssl` (Boolean)
 
-### Read-Only
-
-- `id` (String) The ID of this resource.
-
 <a id="nestedblock--pdt_context_override"></a>
 ### Nested Schema for `pdt_context_override`
 
