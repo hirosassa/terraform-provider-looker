@@ -55,11 +55,10 @@ resource "looker_connection" "snowflake_connection" {
 ### Optional
 
 - `after_connect_statements` (String)
-- `certificate` (String, Sensitive)
+- `certificate` (String, Sensitive) Base64 encoded certificate body for server authentication (when appropriate for the dialect). Due to limitations in the Looker API, changes made outside of Terraform cannot be detected.
 - `db_timezone` (String)
 - `disable_context_comment` (Boolean)
-- `file_type` (String)
-- `id` (String) The ID of this resource.
+- `file_type` (String) Certificate key file type (.json or .p12).
 - `jdbc_additional_params` (String)
 - `maintenance_cron` (String)
 - `max_billing_gigabytes` (String)
@@ -80,6 +79,10 @@ resource "looker_connection" "snowflake_connection" {
 - `user_attribute_fields` (Set of String)
 - `user_db_credentials` (Boolean)
 - `verify_ssl` (Boolean)
+
+### Read-Only
+
+- `id` (String) The ID of this resource.
 
 <a id="nestedblock--pdt_context_override"></a>
 ### Nested Schema for `pdt_context_override`
