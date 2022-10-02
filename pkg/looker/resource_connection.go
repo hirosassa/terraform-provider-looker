@@ -52,16 +52,18 @@ func resourceConnection() *schema.Resource {
 				},
 			},
 			"certificate": {
-				Type:      schema.TypeString,
-				Optional:  true,
-				Sensitive: true,
-				Computed:  true,
-				StateFunc: hash,
+				Type:        schema.TypeString,
+				Description: "Base64 encoded certificate body for server authentication (when " +
+										 "appropriate for the dialect). Due to limitations in the Looker " +
+										 "API, changes made outside of Terraform cannot be detected.",
+				Optional:    true,
+				Sensitive:   true,
+				StateFunc:   hash,
 			},
 			"file_type": {
 				Type:         schema.TypeString,
+				Description:  "Certificate key file type (.json or .p12).",
 				Optional:     true,
-				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{".json", ".p12"}, false),
 			},
 			"database": {
