@@ -370,7 +370,7 @@ func expandWriteDBConnection(d *schema.ResourceData) (*apiclient.WriteDBConnecti
 		tmpDbName := v.(string)
 		writeDBConnection.TmpDbName = &tmpDbName
 	}
-	if v, ok := d.GetOk("jdbc_addtional_params"); ok {
+	if v, ok := d.GetOk("jdbc_additional_params"); ok {
 		jdbcAdditionalParams := v.(string)
 		writeDBConnection.JdbcAdditionalParams = &jdbcAdditionalParams
 	}
