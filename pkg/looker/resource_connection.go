@@ -173,7 +173,7 @@ func resourceConnection() *schema.Resource {
 							ForceNew: true,
 							Optional: true,
 						},
-						"passowrd": {
+						"password": {
 							Type:      schema.TypeString,
 							ForceNew:  true,
 							Optional:  true,
