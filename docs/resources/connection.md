@@ -93,7 +93,7 @@ Optional:
 - `file_type` (String)
 - `host` (String)
 - `jdbc_additional_params` (String)
-- `passowrd` (String, Sensitive)
+- `password` (String, Sensitive)
 - `port` (String)
 - `schema` (String)
 - `username` (String)
