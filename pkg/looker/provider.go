@@ -64,6 +64,9 @@ func Provider() *schema.Provider {
 			"looker_user_attribute_group_value": resourceUserAttributeGroupValue(),
 			"looker_connection":                 resourceConnection(),
 			"looker_lookml_model":               resourceLookMLModel(),
+			"looker_folder":                     resourceFolder(),
+            "looker_project":                    resourceProject(),
+            "looker_project_git_repo":           resourceProjectGitRepo(),
 		},
 
 		ConfigureContextFunc: providerConfigure,
