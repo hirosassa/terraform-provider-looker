@@ -22,6 +22,7 @@ data "looker_users" "looker_users" {
 
 ### Read-Only
 
+- `id` (String) The unique identifier for the resource.
 - `users` (List of Object) (see [below for nested schema](#nestedatt--users))
 
 <a id="nestedatt--users"></a>

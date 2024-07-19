@@ -2,6 +2,8 @@ package looker
 
 import (
 	"context"
+	"sort"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -12,6 +14,11 @@ func dataSourceUsers() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceUsersRead,
 		Schema: map[string]*schema.Schema{
+			"id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The unique identifier for the resource.",
+			},
 			"users": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -54,6 +61,7 @@ func dataSourceUsersRead(ctx context.Context, d *schema.ResourceData, m interfac
 	}
 
 	userList := make([]map[string]interface{}, len(users))
+	userEmails := make([]string, len(users))
 	for i, user := range users {
 		userList[i] = map[string]interface{}{
 			"id":          *user.Id,
@@ -62,11 +70,16 @@ func dataSourceUsersRead(ctx context.Context, d *schema.ResourceData, m interfac
 			"last_name":   *user.LastName,
 			"is_disabled": *user.IsDisabled,
 		}
+		userEmails[i] = *user.Email
 	}
 
 	if err := d.Set("users", userList); err != nil {
 		return diag.FromErr(err)
 	}
+
+	// Generate a hash of the user emails to use as the resource ID
+	sort.Strings(userEmails)
+	d.SetId(hash(strings.Join(userEmails, ",")))
 
 	return nil
 }
