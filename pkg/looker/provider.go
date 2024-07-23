@@ -65,6 +65,9 @@ func Provider() *schema.Provider {
 			"looker_connection":                 resourceConnection(),
 			"looker_lookml_model":               resourceLookMLModel(),
 		},
+		DataSourcesMap: map[string]*schema.Resource{
+			"looker_users": dataSourceUsers(),
+		},
 
 		ConfigureContextFunc: providerConfigure,
 	}
