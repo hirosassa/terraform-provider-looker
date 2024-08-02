@@ -1,6 +1,6 @@
 module github.com/hirosassa/terraform-provider-looker
 
-go 1.20
+go 1.22
 
 require (
 	github.com/hashicorp/terraform-plugin-docs v0.7.0
