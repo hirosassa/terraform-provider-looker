@@ -104,9 +104,14 @@ func resourceGroupMembershipRead(ctx context.Context, d *schema.ResourceData, m 
 func resourceGroupMembershipUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	targetGroupID := d.Id()
 
-	protectedUserIDs := expandStringListFromSet(d.Get("delete_protected_user_ids"))
+	userIDs := expandStringListFromSet(d.Get("user_ids"))
+	err := checkUsersExist(m, userIDs)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	err := removeAllUsersFromGroup(m, targetGroupID, protectedUserIDs)
+	protectedUserIDs := expandStringListFromSet(d.Get("delete_protected_user_ids"))
+	err = removeAllUsersFromGroup(m, targetGroupID, protectedUserIDs)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -116,7 +121,6 @@ func resourceGroupMembershipUpdate(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	userIDs := expandStringListFromSet(d.Get("user_ids"))
 	err = addGroupUsers(m, targetGroupID, userIDs)
 	if err != nil {
 		return diag.FromErr(err)
@@ -158,6 +162,19 @@ func addGroupUsers(m interface{}, targetGroupID string, userIDs []string) error 
 		}
 
 		_, err := client.AddGroupUser(targetGroupID, body, nil)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func checkUsersExist(m interface{}, userIDs []string) error {
+	client := m.(*apiclient.LookerSDK)
+
+	for _, userID := range userIDs {
+		_, err := client.User(userID, "", nil)
 		if err != nil {
 			return err
 		}
