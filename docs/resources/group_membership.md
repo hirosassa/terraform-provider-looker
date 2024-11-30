@@ -29,6 +29,7 @@ resource "looker_group_membership" "group_membership" {
 
 ### Optional
 
+- `delete_protected_user_ids` (Set of String)
 - `group_ids` (Set of String)
 - `id` (String) The ID of this resource.
 - `user_ids` (Set of String)
