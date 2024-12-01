@@ -29,6 +29,12 @@ func resourceGroupMembership() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
+			"delete_protected_user_ids": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+			},
 			"group_ids": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -98,7 +104,9 @@ func resourceGroupMembershipRead(ctx context.Context, d *schema.ResourceData, m 
 func resourceGroupMembershipUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	targetGroupID := d.Id()
 
-	err := removeAllUsersFromGroup(m, targetGroupID)
+	protectedUserIDs := expandStringListFromSet(d.Get("delete_protected_user_ids"))
+
+	err := removeAllUsersFromGroup(m, targetGroupID, protectedUserIDs)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -126,7 +134,9 @@ func resourceGroupMembershipUpdate(ctx context.Context, d *schema.ResourceData, 
 func resourceGroupMembershipDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	targetGroupID := d.Id()
 
-	err := removeAllUsersFromGroup(m, targetGroupID)
+	protectedUserIDs := expandStringListFromSet(d.Get("delete_protected_user_ids"))
+
+	err := removeAllUsersFromGroup(m, targetGroupID, protectedUserIDs)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -173,7 +183,16 @@ func addGroupGroups(m interface{}, targetGroupID string, groupIDs []string) erro
 	return nil
 }
 
-func removeAllUsersFromGroup(m interface{}, groupID string) error {
+func contains[T comparable](slice []T, value T) bool {
+	for _, v := range slice {
+		if v == value {
+			return true
+		}
+	}
+	return false
+}
+
+func removeAllUsersFromGroup(m interface{}, groupID string, protectedUserIDs []string) error {
 	client := m.(*apiclient.LookerSDK)
 	req := apiclient.RequestAllGroupUsers{
 		GroupId: groupID,
@@ -185,9 +204,11 @@ func removeAllUsersFromGroup(m interface{}, groupID string) error {
 	}
 
 	for _, user := range users {
-		err = client.DeleteGroupUser(groupID, *user.Id, nil)
-		if err != nil {
-			return err
+		if protectedUserIDs == nil || !contains(protectedUserIDs, *user.Id) {
+			err = client.DeleteGroupUser(groupID, *user.Id, nil)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
