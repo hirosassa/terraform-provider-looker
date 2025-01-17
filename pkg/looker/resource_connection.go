@@ -231,6 +231,14 @@ func resourceConnection() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"uses_application_default_credentials": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"impersonated_service_account": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -415,6 +423,15 @@ func expandWriteDBConnection(d *schema.ResourceData) (*apiclient.WriteDBConnecti
 		oauthApplicationId := v.(string) // for api breaking change
 		writeDBConnection.OauthApplicationId = &oauthApplicationId
 	}
+	if v, ok := d.GetOk("uses_application_default_credentials"); ok {
+		usesApplicationDefaultCredentials := v.(bool)
+		writeDBConnection.UsesApplicationDefaultCredentials = &usesApplicationDefaultCredentials
+	}
+	if v, ok := d.GetOk("impersonated_service_account"); ok {
+		impersonatedServiceAccount := v.(string)
+		writeDBConnection.ImpersonatedServiceAccount = &impersonatedServiceAccount
+	}
+
 
 	userAttributeFields := expandStringListFromSet(d.Get("user_attribute_fields").(*schema.Set))
 	writeDBConnection.UserAttributeFields = &userAttributeFields
@@ -576,6 +593,12 @@ func flattenConnection(connection apiclient.DBConnection, d *schema.ResourceData
 		return err
 	}
 	if err := d.Set("oauth_application_id", connection.OauthApplicationId); err != nil {
+		return err
+	}
+	if err := d.Set("uses_application_default_credentials", connection.UsesApplicationDefaultCredentials); err != nil {
+		return err
+	}
+	if err := d.Set("impersonated_service_account", connection.ImpersonatedServiceAccount); err != nil {
 		return err
 	}
 	return nil
