@@ -439,37 +439,48 @@ func expandWriteDBConnection(d *schema.ResourceData) (*apiclient.WriteDBConnecti
 	if _, ok := d.GetOk("pdt_context_override"); ok {
 		var pdtContextOverride apiclient.WriteDBConnectionOverride
 		if v, ok := d.GetOk("pdt_context_override.0.context"); ok {
-			pdtContextOverride.Context = v.(*string)
+			context := v.(string)
+			pdtContextOverride.Context = &context
 		}
 		if v, ok := d.GetOk("pdt_context_override.0.host"); ok {
-			pdtContextOverride.Host = v.(*string)
+			host := v.(string)
+			pdtContextOverride.Host = &host
 		}
 		if v, ok := d.GetOk("pdt_context_override.0.port"); ok {
-			pdtContextOverride.Port = v.(*string)
+			port := v.(string)
+			pdtContextOverride.Port = &port
 		}
 		if v, ok := d.GetOk("pdt_context_override.0.username"); ok {
-			pdtContextOverride.Username = v.(*string)
+			username := v.(string)
+			pdtContextOverride.Username = &username
 		}
 		if v, ok := d.GetOk("pdt_context_override.0.password"); ok {
-			pdtContextOverride.Password = v.(*string)
+			password := v.(string)
+			pdtContextOverride.Password = &password
 		}
 		if v, ok := d.GetOk("pdt_context_override.0.certificate"); ok {
-			pdtContextOverride.Certificate = v.(*string)
+			certificate := v.(string)
+			pdtContextOverride.Certificate = &certificate
 		}
 		if v, ok := d.GetOk("pdt_context_override.0.file_type"); ok {
-			pdtContextOverride.FileType = v.(*string)
+			fileType := v.(string)
+			pdtContextOverride.FileType = &fileType
 		}
 		if v, ok := d.GetOk("pdt_context_override.0.database"); ok {
-			pdtContextOverride.Database = v.(*string)
+			database := v.(string)
+			pdtContextOverride.Database = &database
 		}
 		if v, ok := d.GetOk("pdt_context_override.0.schema"); ok {
-			pdtContextOverride.Schema = v.(*string)
+			schema := v.(string)
+	        pdtContextOverride.Schema = &schema
 		}
 		if v, ok := d.GetOk("pdt_context_override.0.jdbc_additional_params"); ok {
-			pdtContextOverride.JdbcAdditionalParams = v.(*string)
+			jdbcAdditionalParams := v.(string)
+        	pdtContextOverride.JdbcAdditionalParams = &jdbcAdditionalParams
 		}
 		if v, ok := d.GetOk("pdt_context_override.0.after_connect_statements"); ok {
-			pdtContextOverride.AfterConnectStatements = v.(*string)
+			afterConnectStatements := v.(string)
+        	pdtContextOverride.AfterConnectStatements = &afterConnectStatements
 		}
 
 		writeDBConnection.PdtContextOverride = &pdtContextOverride
