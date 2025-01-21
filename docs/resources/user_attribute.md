@@ -35,9 +35,10 @@ resource "looker_user_attribute" "my_user_attribute" {
 
 - `default_value` (String)
 - `hidden_value_domain_whitelist` (String)
-- `id` (String) The ID of this resource.
 - `user_can_edit` (Boolean)
 - `user_can_view` (Boolean)
 - `value_is_hidden` (Boolean)
 
+### Read-Only
 
+- `id` (String) The ID of this resource.

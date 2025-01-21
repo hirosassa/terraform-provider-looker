@@ -29,8 +29,6 @@ resource "looker_user_attribute_user_value" "my_user_attribute_user_value" {
 - `user_id` (String)
 - `value` (String)
 
-### Optional
+### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

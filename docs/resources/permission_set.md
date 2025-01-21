@@ -27,8 +27,6 @@ resource "looker_permission_set" "permission_set" {
 - `name` (String)
 - `permissions` (Set of String)
 
-### Optional
+### Read-Only
 
 - `id` (String) The ID of this resource.
-
-
