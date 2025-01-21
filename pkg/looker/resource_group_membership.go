@@ -15,6 +15,7 @@ func resourceGroupMembership() *schema.Resource {
 		ReadContext:   resourceGroupMembershipRead,
 		UpdateContext: resourceGroupMembershipUpdate,
 		DeleteContext: resourceGroupMembershipDelete,
+		CustomizeDiff: validate,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -44,6 +45,11 @@ func resourceGroupMembership() *schema.Resource {
 			},
 		},
 	}
+}
+
+func validate(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
+	userIDs := expandStringListFromSet(d.Get("user_ids"))
+	return checkUsersExist(m, userIDs)
 }
 
 func resourceGroupMembershipCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
