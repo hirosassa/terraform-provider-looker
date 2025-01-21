@@ -2,6 +2,7 @@ package looker
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -176,7 +177,7 @@ func checkUsersExist(m interface{}, userIDs []string) error {
 	for _, userID := range userIDs {
 		_, err := client.User(userID, "", nil)
 		if err != nil {
-			return err
+			return fmt.Errorf("error fetching user with id %s: %w", userID, err)
 		}
 	}
 
