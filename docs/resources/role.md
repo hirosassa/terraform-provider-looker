@@ -29,8 +29,6 @@ resource "looker_role" "role" {
 - `name` (String)
 - `permission_set_id` (String)
 
-### Optional
+### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

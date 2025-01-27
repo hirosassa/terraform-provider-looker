@@ -29,8 +29,6 @@ resource "looker_lookml_model" "lookml_model" {
 - `name` (String)
 - `project_name` (String)
 
-### Optional
+### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

@@ -2,6 +2,7 @@ package looker
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -14,6 +15,7 @@ func resourceGroupMembership() *schema.Resource {
 		ReadContext:   resourceGroupMembershipRead,
 		UpdateContext: resourceGroupMembershipUpdate,
 		DeleteContext: resourceGroupMembershipDelete,
+		CustomizeDiff: validate,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -43,6 +45,11 @@ func resourceGroupMembership() *schema.Resource {
 			},
 		},
 	}
+}
+
+func validate(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
+	userIDs := expandStringListFromSet(d.Get("user_ids"))
+	return checkUsersExist(m, userIDs)
 }
 
 func resourceGroupMembershipCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -104,9 +111,14 @@ func resourceGroupMembershipRead(ctx context.Context, d *schema.ResourceData, m 
 func resourceGroupMembershipUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	targetGroupID := d.Id()
 
-	protectedUserIDs := expandStringListFromSet(d.Get("delete_protected_user_ids"))
+	userIDs := expandStringListFromSet(d.Get("user_ids"))
+	err := checkUsersExist(m, userIDs)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	err := removeAllUsersFromGroup(m, targetGroupID, protectedUserIDs)
+	protectedUserIDs := expandStringListFromSet(d.Get("delete_protected_user_ids"))
+	err = removeAllUsersFromGroup(m, targetGroupID, protectedUserIDs)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -116,7 +128,6 @@ func resourceGroupMembershipUpdate(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	userIDs := expandStringListFromSet(d.Get("user_ids"))
 	err = addGroupUsers(m, targetGroupID, userIDs)
 	if err != nil {
 		return diag.FromErr(err)
@@ -160,6 +171,19 @@ func addGroupUsers(m interface{}, targetGroupID string, userIDs []string) error 
 		_, err := client.AddGroupUser(targetGroupID, body, nil)
 		if err != nil {
 			return err
+		}
+	}
+
+	return nil
+}
+
+func checkUsersExist(m interface{}, userIDs []string) error {
+	client := m.(*apiclient.LookerSDK)
+
+	for _, userID := range userIDs {
+		_, err := client.User(userID, "", nil)
+		if err != nil {
+			return fmt.Errorf("error fetching user with id %s: %w", userID, err)
 		}
 	}
 

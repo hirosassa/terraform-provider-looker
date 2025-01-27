@@ -35,5 +35,3 @@ Read-Only:
 - `id` (String)
 - `is_disabled` (Boolean)
 - `last_name` (String)
-
-
