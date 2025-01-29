@@ -59,6 +59,7 @@ resource "looker_connection" "snowflake_connection" {
 - `db_timezone` (String)
 - `disable_context_comment` (Boolean)
 - `file_type` (String) Certificate key file type (.json or .p12).
+- `impersonated_service_account` (String)
 - `jdbc_additional_params` (String)
 - `maintenance_cron` (String)
 - `max_billing_gigabytes` (String)
@@ -76,6 +77,7 @@ resource "looker_connection" "snowflake_connection" {
 - `ssl` (Boolean)
 - `tmp_db_name` (String)
 - `tunnel_id` (String)
+- `uses_application_default_credentials` (Boolean)
 - `user_attribute_fields` (Set of String)
 - `user_db_credentials` (Boolean)
 - `verify_ssl` (Boolean)
