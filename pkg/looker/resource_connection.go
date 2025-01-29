@@ -374,9 +374,15 @@ func expandWriteDBConnection(d *schema.ResourceData) (*apiclient.WriteDBConnecti
 		verifySsl := v.(bool)
 		writeDBConnection.VerifySsl = &verifySsl
 	}
-	if v, ok := d.GetOk("tmp_db_name"); ok {
-		tmpDbName := v.(string)
-		writeDBConnection.TmpDbName = &tmpDbName
+	if d.HasChange("tmp_db_name") {
+		old, new := d.GetChange("tmp_db_name")
+		if new == nil && old != nil {
+			tmpDbName := ""
+			writeDBConnection.TmpDbName = &tmpDbName
+		} else if new != nil {
+			tmpDbName := new.(string)
+			writeDBConnection.TmpDbName = &tmpDbName
+		}
 	}
 	if v, ok := d.GetOk("jdbc_additional_params"); ok {
 		jdbcAdditionalParams := v.(string)
@@ -419,17 +425,35 @@ func expandWriteDBConnection(d *schema.ResourceData) (*apiclient.WriteDBConnecti
 		disable_context_comment := v.(bool)
 		writeDBConnection.DisableContextComment = &disable_context_comment
 	}
-	if v, ok := d.GetOk("oauth_application_id"); ok {
-		oauthApplicationId := v.(string) // for api breaking change
-		writeDBConnection.OauthApplicationId = &oauthApplicationId
+	if d.HasChange("oauth_application_id") {
+		old, new := d.GetChange("oauth_application_id")
+		if new == nil && old != nil {
+			oauthApplicationId := ""
+			writeDBConnection.OauthApplicationId = &oauthApplicationId
+		} else if new != nil {
+			oauthApplicationId := new.(string)
+			writeDBConnection.OauthApplicationId = &oauthApplicationId
+		}
 	}
-	if v, ok := d.GetOk("uses_application_default_credentials"); ok {
-		usesApplicationDefaultCredentials := v.(bool)
-		writeDBConnection.UsesApplicationDefaultCredentials = &usesApplicationDefaultCredentials
+	if d.HasChange("uses_application_default_credentials") {
+		old, new := d.GetChange("uses_application_default_credentials")
+		if new == nil && old != nil {
+			usesApplicationDefaultCredentials := false
+			writeDBConnection.UsesApplicationDefaultCredentials = &usesApplicationDefaultCredentials
+		} else if new != nil {
+			usesApplicationDefaultCredentials := new.(bool)
+			writeDBConnection.UsesApplicationDefaultCredentials = &usesApplicationDefaultCredentials
+		}
 	}
-	if v, ok := d.GetOk("impersonated_service_account"); ok {
-		impersonatedServiceAccount := v.(string)
-		writeDBConnection.ImpersonatedServiceAccount = &impersonatedServiceAccount
+	if d.HasChange("impersonated_service_account") {
+		old, new := d.GetChange("impersonated_service_account")
+		if new == nil && old != nil {
+			impersonatedServiceAccount := ""
+			writeDBConnection.ImpersonatedServiceAccount = &impersonatedServiceAccount
+		} else if new != nil {
+			impersonatedServiceAccount := new.(string)
+			writeDBConnection.ImpersonatedServiceAccount = &impersonatedServiceAccount
+		}
 	}
 
 
