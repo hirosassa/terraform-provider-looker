@@ -77,9 +77,9 @@ resource "looker_connection" "snowflake_connection" {
 - `ssl` (Boolean)
 - `tmp_db_name` (String)
 - `tunnel_id` (String)
-- `uses_application_default_credentials` (Boolean)
 - `user_attribute_fields` (Set of String)
 - `user_db_credentials` (Boolean)
+- `uses_application_default_credentials` (Boolean)
 - `verify_ssl` (Boolean)
 
 ### Read-Only
