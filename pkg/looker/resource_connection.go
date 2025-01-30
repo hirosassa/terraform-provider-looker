@@ -231,6 +231,14 @@ func resourceConnection() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"uses_application_default_credentials": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"impersonated_service_account": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -366,9 +374,15 @@ func expandWriteDBConnection(d *schema.ResourceData) (*apiclient.WriteDBConnecti
 		verifySsl := v.(bool)
 		writeDBConnection.VerifySsl = &verifySsl
 	}
-	if v, ok := d.GetOk("tmp_db_name"); ok {
-		tmpDbName := v.(string)
-		writeDBConnection.TmpDbName = &tmpDbName
+	if d.HasChange("tmp_db_name") {
+		old, new := d.GetChange("tmp_db_name")
+		if new == nil && old != nil {
+			tmpDbName := ""
+			writeDBConnection.TmpDbName = &tmpDbName
+		} else if new != nil {
+			tmpDbName := new.(string)
+			writeDBConnection.TmpDbName = &tmpDbName
+		}
 	}
 	if v, ok := d.GetOk("jdbc_additional_params"); ok {
 		jdbcAdditionalParams := v.(string)
@@ -411,10 +425,37 @@ func expandWriteDBConnection(d *schema.ResourceData) (*apiclient.WriteDBConnecti
 		disable_context_comment := v.(bool)
 		writeDBConnection.DisableContextComment = &disable_context_comment
 	}
-	if v, ok := d.GetOk("oauth_application_id"); ok {
-		oauthApplicationId := v.(string) // for api breaking change
-		writeDBConnection.OauthApplicationId = &oauthApplicationId
+	if d.HasChange("oauth_application_id") {
+		old, new := d.GetChange("oauth_application_id")
+		if new == nil && old != nil {
+			oauthApplicationId := ""
+			writeDBConnection.OauthApplicationId = &oauthApplicationId
+		} else if new != nil {
+			oauthApplicationId := new.(string)
+			writeDBConnection.OauthApplicationId = &oauthApplicationId
+		}
 	}
+	if d.HasChange("uses_application_default_credentials") {
+		old, new := d.GetChange("uses_application_default_credentials")
+		if new == nil && old != nil {
+			usesApplicationDefaultCredentials := false
+			writeDBConnection.UsesApplicationDefaultCredentials = &usesApplicationDefaultCredentials
+		} else if new != nil {
+			usesApplicationDefaultCredentials := new.(bool)
+			writeDBConnection.UsesApplicationDefaultCredentials = &usesApplicationDefaultCredentials
+		}
+	}
+	if d.HasChange("impersonated_service_account") {
+		old, new := d.GetChange("impersonated_service_account")
+		if new == nil && old != nil {
+			impersonatedServiceAccount := ""
+			writeDBConnection.ImpersonatedServiceAccount = &impersonatedServiceAccount
+		} else if new != nil {
+			impersonatedServiceAccount := new.(string)
+			writeDBConnection.ImpersonatedServiceAccount = &impersonatedServiceAccount
+		}
+	}
+
 
 	userAttributeFields := expandStringListFromSet(d.Get("user_attribute_fields").(*schema.Set))
 	writeDBConnection.UserAttributeFields = &userAttributeFields
@@ -422,37 +463,48 @@ func expandWriteDBConnection(d *schema.ResourceData) (*apiclient.WriteDBConnecti
 	if _, ok := d.GetOk("pdt_context_override"); ok {
 		var pdtContextOverride apiclient.WriteDBConnectionOverride
 		if v, ok := d.GetOk("pdt_context_override.0.context"); ok {
-			pdtContextOverride.Context = v.(*string)
+			context := v.(string)
+			pdtContextOverride.Context = &context
 		}
 		if v, ok := d.GetOk("pdt_context_override.0.host"); ok {
-			pdtContextOverride.Host = v.(*string)
+			host := v.(string)
+			pdtContextOverride.Host = &host
 		}
 		if v, ok := d.GetOk("pdt_context_override.0.port"); ok {
-			pdtContextOverride.Port = v.(*string)
+			port := v.(string)
+			pdtContextOverride.Port = &port
 		}
 		if v, ok := d.GetOk("pdt_context_override.0.username"); ok {
-			pdtContextOverride.Username = v.(*string)
+			username := v.(string)
+			pdtContextOverride.Username = &username
 		}
 		if v, ok := d.GetOk("pdt_context_override.0.password"); ok {
-			pdtContextOverride.Password = v.(*string)
+			password := v.(string)
+			pdtContextOverride.Password = &password
 		}
 		if v, ok := d.GetOk("pdt_context_override.0.certificate"); ok {
-			pdtContextOverride.Certificate = v.(*string)
+			certificate := v.(string)
+			pdtContextOverride.Certificate = &certificate
 		}
 		if v, ok := d.GetOk("pdt_context_override.0.file_type"); ok {
-			pdtContextOverride.FileType = v.(*string)
+			fileType := v.(string)
+			pdtContextOverride.FileType = &fileType
 		}
 		if v, ok := d.GetOk("pdt_context_override.0.database"); ok {
-			pdtContextOverride.Database = v.(*string)
+			database := v.(string)
+			pdtContextOverride.Database = &database
 		}
 		if v, ok := d.GetOk("pdt_context_override.0.schema"); ok {
-			pdtContextOverride.Schema = v.(*string)
+			schema := v.(string)
+	        pdtContextOverride.Schema = &schema
 		}
 		if v, ok := d.GetOk("pdt_context_override.0.jdbc_additional_params"); ok {
-			pdtContextOverride.JdbcAdditionalParams = v.(*string)
+			jdbcAdditionalParams := v.(string)
+        	pdtContextOverride.JdbcAdditionalParams = &jdbcAdditionalParams
 		}
 		if v, ok := d.GetOk("pdt_context_override.0.after_connect_statements"); ok {
-			pdtContextOverride.AfterConnectStatements = v.(*string)
+			afterConnectStatements := v.(string)
+        	pdtContextOverride.AfterConnectStatements = &afterConnectStatements
 		}
 
 		writeDBConnection.PdtContextOverride = &pdtContextOverride
@@ -576,6 +628,12 @@ func flattenConnection(connection apiclient.DBConnection, d *schema.ResourceData
 		return err
 	}
 	if err := d.Set("oauth_application_id", connection.OauthApplicationId); err != nil {
+		return err
+	}
+	if err := d.Set("uses_application_default_credentials", connection.UsesApplicationDefaultCredentials); err != nil {
+		return err
+	}
+	if err := d.Set("impersonated_service_account", connection.ImpersonatedServiceAccount); err != nil {
 		return err
 	}
 	return nil
