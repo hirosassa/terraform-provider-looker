@@ -118,23 +118,6 @@ func getGroupIDs(m interface{}, groupId string) ([]string, error) {
 	return flattenGroupIDs(groups), nil
 }
 
-func differentStringSlices(a, b []string) bool {
-	if len(a) != len(b) {
-		return true
-	}
-	counts := make(map[string]int)
-	for _, item := range a {
-		counts[item]++
-	}
-	for _, item := range b {
-		counts[item]--
-		if counts[item] < 0 {
-			return true
-		}
-	}
-	return false
-}
-
 func resourceGroupMembershipUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	targetGroupID := d.Id()
 
