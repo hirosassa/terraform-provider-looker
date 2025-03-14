@@ -1,7 +1,6 @@
-run:
-  linters:
-    enable:
-      - gofmt
-      - whitespace
-      - unparam
-      - scopelint
+linters:
+  enable:
+    - gofmt
+    - whitespace
+    - unparam
+    - scopelint

@@ -4,6 +4,9 @@ on:
     paths-ignore:
       - 'README.md'
 
+permissions:
+  contents: read
+
 jobs:
   golangci:
     name: lint
