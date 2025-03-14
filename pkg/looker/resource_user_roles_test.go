@@ -57,9 +57,7 @@ func testAccCheckUserRoleDestroy(s *terraform.State) error {
 		if len(userRoles) != 0 {
 			return fmt.Errorf("user_role '%s' still exists", rs.Primary.ID)
 		}
-
 	}
-
 	return nil
 }
 

@@ -55,9 +55,7 @@ func testAccCheckRoleGroupsDestroy(s *terraform.State) error {
 		if len(groups) != 0 {
 			return fmt.Errorf("role_groups '%s' still exists", rs.Primary.ID)
 		}
-
 	}
-
 	return nil
 }
 

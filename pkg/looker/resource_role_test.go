@@ -55,9 +55,7 @@ func testAccCheckRoleDestroy(s *terraform.State) error {
 		if *role.Name == rs.Primary.Attributes["name"] {
 			return fmt.Errorf("role '%s' still exists", rs.Primary.ID)
 		}
-
 	}
-
 	return nil
 }
 

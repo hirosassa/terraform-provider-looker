@@ -3,4 +3,3 @@ linters:
     - gofmt
     - whitespace
     - unparam
-    - scopelint

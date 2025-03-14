@@ -52,13 +52,13 @@ func resourceConnection() *schema.Resource {
 				},
 			},
 			"certificate": {
-				Type:        schema.TypeString,
+				Type: schema.TypeString,
 				Description: "Base64 encoded certificate body for server authentication (when " +
-										 "appropriate for the dialect). Due to limitations in the Looker " +
-										 "API, changes made outside of Terraform cannot be detected.",
-				Optional:    true,
-				Sensitive:   true,
-				StateFunc:   hash,
+					"appropriate for the dialect). Due to limitations in the Looker " +
+					"API, changes made outside of Terraform cannot be detected.",
+				Optional:  true,
+				Sensitive: true,
+				StateFunc: hash,
 			},
 			"file_type": {
 				Type:         schema.TypeString,
@@ -246,10 +246,7 @@ func resourceConnection() *schema.Resource {
 func resourceConnectionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
-	body, err := expandWriteDBConnection(d)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	body := expandWriteDBConnection(d)
 
 	result, err := client.CreateConnection(*body, nil)
 	if err != nil {
@@ -281,12 +278,9 @@ func resourceConnectionUpdate(ctx context.Context, d *schema.ResourceData, m int
 	client := m.(*apiclient.LookerSDK)
 
 	name := d.Id()
-	body, err := expandWriteDBConnection(d)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	body := expandWriteDBConnection(d)
 
-	_, err = client.UpdateConnection(name, *body, nil)
+	_, err := client.UpdateConnection(name, *body, nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -314,7 +308,7 @@ func resourceConnectionImport(ctx context.Context, d *schema.ResourceData, m int
 	return []*schema.ResourceData{d}, nil
 }
 
-func expandWriteDBConnection(d *schema.ResourceData) (*apiclient.WriteDBConnection, error) {
+func expandWriteDBConnection(d *schema.ResourceData) *apiclient.WriteDBConnection {
 	// required values
 	name := d.Get("name").(string)
 	host := d.Get("host").(string)
@@ -456,7 +450,6 @@ func expandWriteDBConnection(d *schema.ResourceData) (*apiclient.WriteDBConnecti
 		}
 	}
 
-
 	userAttributeFields := expandStringListFromSet(d.Get("user_attribute_fields").(*schema.Set))
 	writeDBConnection.UserAttributeFields = &userAttributeFields
 
@@ -496,21 +489,21 @@ func expandWriteDBConnection(d *schema.ResourceData) (*apiclient.WriteDBConnecti
 		}
 		if v, ok := d.GetOk("pdt_context_override.0.schema"); ok {
 			schema := v.(string)
-	        pdtContextOverride.Schema = &schema
+			pdtContextOverride.Schema = &schema
 		}
 		if v, ok := d.GetOk("pdt_context_override.0.jdbc_additional_params"); ok {
 			jdbcAdditionalParams := v.(string)
-        	pdtContextOverride.JdbcAdditionalParams = &jdbcAdditionalParams
+			pdtContextOverride.JdbcAdditionalParams = &jdbcAdditionalParams
 		}
 		if v, ok := d.GetOk("pdt_context_override.0.after_connect_statements"); ok {
 			afterConnectStatements := v.(string)
-        	pdtContextOverride.AfterConnectStatements = &afterConnectStatements
+			pdtContextOverride.AfterConnectStatements = &afterConnectStatements
 		}
 
 		writeDBConnection.PdtContextOverride = &pdtContextOverride
 	}
 
-	return writeDBConnection, nil
+	return writeDBConnection
 }
 
 func flattenConnection(connection apiclient.DBConnection, d *schema.ResourceData) error {

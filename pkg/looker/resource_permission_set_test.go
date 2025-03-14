@@ -64,9 +64,7 @@ func testAccCheckPermissionSetDestroy(s *terraform.State) error {
 		if *permissionSet.Name == rs.Primary.Attributes["name"] {
 			return fmt.Errorf("permission_set '%s' still exists", rs.Primary.ID)
 		}
-
 	}
-
 	return nil
 }
 
