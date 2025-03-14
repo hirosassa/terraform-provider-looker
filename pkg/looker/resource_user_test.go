@@ -57,9 +57,7 @@ func testAccCheckUserDestroy(s *terraform.State) error {
 		if *user.Email == rs.Primary.Attributes["email"] {
 			return fmt.Errorf("user '%s' still exists", rs.Primary.ID)
 		}
-
 	}
-
 	return nil
 }
 

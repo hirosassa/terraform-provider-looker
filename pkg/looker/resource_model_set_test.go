@@ -64,9 +64,7 @@ func testAccCheckModelSetDestroy(s *terraform.State) error {
 		if *modelSet.Name == rs.Primary.Attributes["name"] {
 			return fmt.Errorf("model_set '%s' still exists", rs.Primary.ID)
 		}
-
 	}
-
 	return nil
 }
 

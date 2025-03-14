@@ -4,6 +4,9 @@ on:
     paths-ignore:
       - 'README.md'
 
+permissions:
+  contents: read
+
 jobs:
   golangci:
     name: lint
@@ -17,7 +20,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.60
+          version: v1.64
           args: --timeout=10m
   check:
     runs-on: ubuntu-latest

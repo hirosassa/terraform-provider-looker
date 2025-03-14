@@ -134,9 +134,7 @@ func testAccCheckGroupMembershipDestroy(s *terraform.State) error {
 		if len(groups) != 0 {
 			return fmt.Errorf("group_membership '%s' still exists", rs.Primary.ID)
 		}
-
 	}
-
 	return nil
 }
 

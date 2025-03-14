@@ -39,10 +39,7 @@ func resourceLookMLModel() *schema.Resource {
 func resourceLookMLModelCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
-	body, err := expandWriteLookmlModel(d)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	body := expandWriteLookmlModel(d)
 
 	result, err := client.CreateLookmlModel(*body, nil)
 	if err != nil {
@@ -72,12 +69,9 @@ func resourceLookMLModelRead(ctx context.Context, d *schema.ResourceData, m inte
 func resourceLookMLModelUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
-	body, err := expandWriteLookmlModel(d)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	body := expandWriteLookmlModel(d)
 
-	_, err = client.UpdateLookmlModel(d.Id(), *body, nil)
+	_, err := client.UpdateLookmlModel(d.Id(), *body, nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -96,7 +90,7 @@ func resourceLookMLModelDelete(ctx context.Context, d *schema.ResourceData, m in
 	return nil
 }
 
-func expandWriteLookmlModel(d *schema.ResourceData) (*apiclient.WriteLookmlModel, error) {
+func expandWriteLookmlModel(d *schema.ResourceData) *apiclient.WriteLookmlModel {
 	modelName := d.Get("name").(string)
 	projectName := d.Get("project_name").(string)
 	var connections []string
@@ -107,7 +101,7 @@ func expandWriteLookmlModel(d *schema.ResourceData) (*apiclient.WriteLookmlModel
 		Name:                     &modelName,
 		ProjectName:              &projectName,
 		AllowedDbConnectionNames: &connections,
-	}, nil
+	}
 }
 
 func flattenLookMLModel(model apiclient.LookmlModel, d *schema.ResourceData) error {

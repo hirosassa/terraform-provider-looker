@@ -70,13 +70,13 @@ func resourceUserAttributeCreate(ctx context.Context, d *schema.ResourceData, m 
 	userAttributeHiddenValueDomainWhitelist := d.Get("hidden_value_domain_whitelist").(string)
 
 	writeUserAttribute := apiclient.WriteUserAttribute{
-		Name:                       userAttributeName,
-		Label:                      userAttributeLabel,
-		Type:                       userAttributeType,
-		DefaultValue:               &userAttributeDefaultValue,
-		ValueIsHidden:              &userAttributeValueIsHidden,
-		UserCanView:                &userAttributeUserCanView,
-		UserCanEdit:                &userAttributeUserCanEdit,
+		Name:          userAttributeName,
+		Label:         userAttributeLabel,
+		Type:          userAttributeType,
+		DefaultValue:  &userAttributeDefaultValue,
+		ValueIsHidden: &userAttributeValueIsHidden,
+		UserCanView:   &userAttributeUserCanView,
+		UserCanEdit:   &userAttributeUserCanEdit,
 	}
 
 	if userAttributeValueIsHidden && userAttributeHiddenValueDomainWhitelist != "" {
@@ -149,13 +149,13 @@ func resourceUserAttributeUpdate(ctx context.Context, d *schema.ResourceData, m 
 	userAttributeHiddenValueDomainWhitelist := d.Get("hidden_value_domain_whitelist").(string)
 
 	writeUserAttribute := apiclient.WriteUserAttribute{
-		Name:                       userAttributeName,
-		Label:                      userAttributeLabel,
-		Type:                       userAttributeType,
-		DefaultValue:               &userAttributeDefaultValue,
-		ValueIsHidden:              &userAttributeValueIsHidden,
-		UserCanView:                &userAttributeUserCanView,
-		UserCanEdit:                &userAttributeUserCanEdit,
+		Name:          userAttributeName,
+		Label:         userAttributeLabel,
+		Type:          userAttributeType,
+		DefaultValue:  &userAttributeDefaultValue,
+		ValueIsHidden: &userAttributeValueIsHidden,
+		UserCanView:   &userAttributeUserCanView,
+		UserCanEdit:   &userAttributeUserCanEdit,
 	}
 
 	if userAttributeValueIsHidden && userAttributeHiddenValueDomainWhitelist != "" {
