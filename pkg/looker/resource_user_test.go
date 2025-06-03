@@ -24,12 +24,34 @@ func TestAcc_User(t *testing.T) {
 					resource.TestCheckResourceAttr("looker_user.test", "first_name", name),
 					resource.TestCheckResourceAttr("looker_user.test", "last_name", name),
 					resource.TestCheckResourceAttr("looker_user.test", "email", fmt.Sprintf("%s@example.com", name)),
+					resource.TestCheckResourceAttr("looker_user.test", "send_setup_link_on_create", "false"),
 				),
 			},
 			{
 				ResourceName:      "looker_user.test",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+		CheckDestroy: testAccCheckUserDestroy,
+	})
+}
+
+func TestAcc_UserWithSetupMail(t *testing.T) {
+	name := strings.ToUpper(acctest.RandStringFromCharSet(10, acctest.CharSetAlpha))
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: userConfigWithSetupMail(name, name, name),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("looker_user.test", "first_name", name),
+					resource.TestCheckResourceAttr("looker_user.test", "last_name", name),
+					resource.TestCheckResourceAttr("looker_user.test", "email", fmt.Sprintf("%s@example.com", name)),
+					resource.TestCheckResourceAttr("looker_user.test", "send_setup_link_on_create", "true"),
+				),
 			},
 		},
 		CheckDestroy: testAccCheckUserDestroy,
@@ -67,6 +89,17 @@ func userConfig(firstName, lastName, email string) string {
 		first_name = "%s"
 		last_name = "%s"
 		email = "%s@example.com"
+	}
+	`, firstName, lastName, email)
+}
+
+func userConfigWithSetupMail(firstName, lastName, email string) string {
+	return fmt.Sprintf(`
+	resource "looker_user" "test" {
+		first_name = "%s"
+		last_name = "%s"
+		email = "%s@example.com"
+		send_setup_link_on_create = true
 	}
 	`, firstName, lastName, email)
 }

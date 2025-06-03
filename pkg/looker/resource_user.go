@@ -37,6 +37,11 @@ func resourceUser() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			"send_setup_link_on_create": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 		},
 	}
 }
@@ -85,6 +90,17 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface
 			return diag.FromErr(err)
 		}
 		return diag.FromErr(err)
+	}
+
+	// Send setup mail if requested
+	sendSetupMail := d.Get("send_setup_link_on_create").(bool)
+	if sendSetupMail {
+		_, err = client.SendUserCredentialsEmailPasswordReset(userID, "", nil)
+		if err != nil {
+			// Log the error but don't fail the resource creation
+			// since the user was successfully created
+			return diag.Errorf("User created successfully but failed to send setup email: %v", err)
+		}
 	}
 
 	return resourceUserRead(ctx, d, m)
