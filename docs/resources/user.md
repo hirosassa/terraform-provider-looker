@@ -33,7 +33,7 @@ resource "looker_user" "user" {
 - `first_name` (String)
 - `is_disabled` (Boolean)
 - `last_name` (String)
-- `send_setup_link_on_create` (Boolean) Send a password reset email to the user upon creation. Defaults to `false`.
+- `send_setup_link_on_create` (Boolean)
 
 ### Read-Only
 
