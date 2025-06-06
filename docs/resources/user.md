@@ -14,9 +14,10 @@ description: |-
 
 ```terraform
 resource "looker_user" "user" {
-  email      = "user@email.com"
-  first_name = "Reporting"
-  last_name  = "API User"
+  email                     = "user@email.com"
+  first_name                = "Reporting"
+  last_name                 = "API User"
+  send_setup_link_on_create = true
 }
 ```
 
@@ -32,6 +33,7 @@ resource "looker_user" "user" {
 - `first_name` (String)
 - `is_disabled` (Boolean)
 - `last_name` (String)
+- `send_setup_link_on_create` (Boolean)
 
 ### Read-Only
 
