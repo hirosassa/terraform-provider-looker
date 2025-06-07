@@ -1,9 +1,11 @@
 .terraform
 terraform-provider-looker
 .env
+.envrc
 crash.log
 terraform.tfstate
 terraform.tfstate.backup
 bin
 vendor
 build
+examples/**/*.terraform*

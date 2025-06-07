@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	apiclient "github.com/looker-open-source/sdk-codegen/go/sdk/v4"
 )
 
 // format the strings into an id `a:b`
@@ -54,6 +55,14 @@ func flattenStringListToSet(strings []string) *schema.Set {
 // 	return ints
 // }
 
+func updateApiSessionWorkspaceId(client *apiclient.LookerSDK, workspaceId string) error {
+	writeApiSession := apiclient.WriteApiSession{
+		WorkspaceId: &workspaceId,
+	}
+	_, err := client.UpdateSession(writeApiSession, nil)
+	return err
+}
+
 func hash(val interface{}) string {
 	if val == nil || val.(string) == "" {
 		return ""
@@ -61,3 +70,4 @@ func hash(val interface{}) string {
 	sha := sha256.Sum256([]byte(val.(string)))
 	return hex.EncodeToString(sha[:])
 }
+
