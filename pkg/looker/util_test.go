@@ -6,6 +6,37 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestDifferentStringSlices(t *testing.T) {
+	tests := map[string]struct {
+		a       []string
+		b       []string
+		wantRes bool
+	}{
+		"same slice": {
+			a:       []string{"a", "b", "c"},
+			b:       []string{"a", "b", "c"},
+			wantRes: false,
+		},
+		"different slice": {
+			a:       []string{"a", "b", "c"},
+			b:       []string{"a", "b", "d"},
+			wantRes: true,
+		},
+		"one slice is empty": {
+			a:       []string{},
+			b:       []string{"a", "b", "c"},
+			wantRes: true,
+		},
+	}
+
+	for key, tt := range tests {
+		t.Run(key, func(t *testing.T) {
+			actual := differentStringSlices(tt.a, tt.b)
+			assert.Equal(t, tt.wantRes, actual)
+		})
+	}
+}
+
 func TestBuildTwoPartID(t *testing.T) {
 	tests := map[string]struct {
 		a       string

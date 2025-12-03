@@ -61,3 +61,20 @@ func hash(val interface{}) string {
 	sha := sha256.Sum256([]byte(val.(string)))
 	return hex.EncodeToString(sha[:])
 }
+
+func differentStringSlices(a, b []string) bool {
+	if len(a) != len(b) {
+		return true
+	}
+	counts := make(map[string]int)
+	for _, item := range a {
+		counts[item]++
+	}
+	for _, item := range b {
+		counts[item]--
+		if counts[item] < 0 {
+			return true
+		}
+	}
+	return false
+}

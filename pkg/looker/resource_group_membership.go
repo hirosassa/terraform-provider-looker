@@ -108,6 +108,16 @@ func resourceGroupMembershipRead(ctx context.Context, d *schema.ResourceData, m 
 	return nil
 }
 
+func getGroupIDs(m interface{}, groupId string) ([]string, error) {
+	client := m.(*apiclient.LookerSDK)
+	groups, err := client.AllGroupGroups(groupId, "", nil) // todo: imeplement paging
+	if err != nil {
+		return nil, err
+	}
+
+	return flattenGroupIDs(groups), nil
+}
+
 func resourceGroupMembershipUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	targetGroupID := d.Id()
 
@@ -122,10 +132,18 @@ func resourceGroupMembershipUpdate(ctx context.Context, d *schema.ResourceData, 
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
-	err = removeAllGroupsFromGroup(m, targetGroupID)
+	groupIDs := expandStringListFromSet(d.Get("group_ids"))
+	actualGroupIDs, err := getGroupIDs(m, targetGroupID)
 	if err != nil {
 		return diag.FromErr(err)
+	}
+	updateGroupsFromGroupRequired := differentStringSlices(actualGroupIDs, groupIDs)
+
+	if updateGroupsFromGroupRequired {
+		err = removeAllGroupsFromGroup(m, targetGroupID)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	err = addGroupUsers(m, targetGroupID, userIDs)
@@ -133,10 +151,11 @@ func resourceGroupMembershipUpdate(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	groupIDs := expandStringListFromSet(d.Get("group_ids"))
-	err = addGroupGroups(m, targetGroupID, groupIDs)
-	if err != nil {
-		return diag.FromErr(err)
+	if updateGroupsFromGroupRequired {
+		err = addGroupGroups(m, targetGroupID, groupIDs)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	return resourceGroupMembershipRead(ctx, d, m)
