@@ -49,7 +49,7 @@ func resourceModelSetCreate(ctx context.Context, d *schema.ResourceData, m inter
 
 	modelSet, err := client.CreateModelSet(writeModelSet, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "CreateModelSet", "model_set", "%s", modelSetName))
 	}
 
 	modelSetID := *modelSet.Id
@@ -65,7 +65,7 @@ func resourceModelSetRead(ctx context.Context, d *schema.ResourceData, m interfa
 
 	modelSet, err := client.ModelSet(modelSetID, "", nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "ModelSet", "model_set", "%s", modelSetID))
 	}
 
 	if err = d.Set("name", modelSet.Name); err != nil {
@@ -93,7 +93,7 @@ func resourceModelSetUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	}
 	_, err := client.UpdateModelSet(modelSetID, writeModelSet, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "UpdateModelSet", "model_set", "name=%s, id=%s", modelSetName, modelSetID))
 	}
 
 	return resourceModelSetRead(ctx, d, m)
@@ -103,10 +103,11 @@ func resourceModelSetDelete(ctx context.Context, d *schema.ResourceData, m inter
 	client := m.(*apiclient.LookerSDK)
 
 	modelSetID := d.Id()
+	modelSetName := d.Get("name").(string)
 
 	_, err := client.DeleteModelSet(modelSetID, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "DeleteModelSet", "model_set", "name=%s, id=%s", modelSetName, modelSetID))
 	}
 
 	return nil

@@ -85,12 +85,12 @@ func resourceGroupMembershipRead(ctx context.Context, d *schema.ResourceData, m 
 
 	users, err := client.AllGroupUsers(req, nil) // todo: imeplement paging
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "AllGroupUsers", "group_membership", "%s", targetGroupID))
 	}
 
 	groups, err := client.AllGroupGroups(targetGroupID, "", nil) // todo: imeplement paging
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "AllGroupGroups", "group_membership", "%s", targetGroupID))
 	}
 
 	if err = d.Set("target_group_id", targetGroupID); err != nil {
@@ -170,7 +170,7 @@ func addGroupUsers(m interface{}, targetGroupID string, userIDs []string) error 
 
 		_, err := client.AddGroupUser(targetGroupID, body, nil)
 		if err != nil {
-			return err
+			return wrapSDKError(err, "AddGroupUser", "group_membership", "%s:%s", targetGroupID, userID)
 		}
 	}
 
@@ -183,7 +183,7 @@ func checkUsersExist(m interface{}, userIDs []string) error {
 	for _, userID := range userIDs {
 		_, err := client.User(userID, "", nil)
 		if err != nil {
-			return fmt.Errorf("error fetching user with id %s: %w", userID, err)
+			return wrapSDKError(fmt.Errorf("error fetching user with id %s: %w", userID, err), "User", "group_membership", "%s", userID)
 		}
 	}
 
@@ -200,7 +200,7 @@ func addGroupGroups(m interface{}, targetGroupID string, groupIDs []string) erro
 
 		_, err := client.AddGroupGroup(targetGroupID, body, nil)
 		if err != nil {
-			return err
+			return wrapSDKError(err, "AddGroupGroup", "group_membership", "%s:%s", targetGroupID, groupID)
 		}
 	}
 
@@ -224,14 +224,14 @@ func removeAllUsersFromGroup(m interface{}, groupID string, protectedUserIDs []s
 
 	users, err := client.AllGroupUsers(req, nil) // todo: imeplement paging
 	if err != nil {
-		return err
+		return wrapSDKError(err, "AllGroupUsers", "group_membership", "%s", groupID)
 	}
 
 	for _, user := range users {
 		if protectedUserIDs == nil || !contains(protectedUserIDs, *user.Id) {
 			err = client.DeleteGroupUser(groupID, *user.Id, nil)
 			if err != nil {
-				return err
+				return wrapSDKError(err, "DeleteGroupUser", "group_membership", "%s:%s", groupID, *user.Id)
 			}
 		}
 	}
@@ -243,13 +243,13 @@ func removeAllGroupsFromGroup(m interface{}, groupID string) error {
 	client := m.(*apiclient.LookerSDK)
 	groups, err := client.AllGroupGroups(groupID, "", nil) // todo: imeplement paging
 	if err != nil {
-		return err
+		return wrapSDKError(err, "AllGroupGroups", "group_membership", "%s", groupID)
 	}
 
 	for _, group := range groups {
 		err = client.DeleteGroupFromGroup(groupID, *group.Id, nil)
 		if err != nil {
-			return err
+			return wrapSDKError(err, "DeleteGroupFromGroup", "group_membership", "%s:%s", groupID, *group.Id)
 		}
 	}
 

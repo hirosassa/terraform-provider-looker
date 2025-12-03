@@ -250,7 +250,7 @@ func resourceConnectionCreate(ctx context.Context, d *schema.ResourceData, m int
 
 	result, err := client.CreateConnection(*body, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "CreateConnection", "connection", "%s", *body.Name))
 	}
 
 	d.SetId(*result.Name)
@@ -260,15 +260,15 @@ func resourceConnectionCreate(ctx context.Context, d *schema.ResourceData, m int
 
 func resourceConnectionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
-	connectionName := d.Id()
+	connectionID := d.Id()
 
-	connection, err := client.Connection(connectionName, "", nil)
+	connection, err := client.Connection(connectionID, "", nil)
 	if err != nil {
 		if strings.Contains(err.Error(), "404") {
 			d.SetId("")
 			return nil
 		}
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "Connection", "connection", "%s", connectionID))
 	}
 
 	return diag.FromErr(flattenConnection(connection, d))
@@ -282,7 +282,7 @@ func resourceConnectionUpdate(ctx context.Context, d *schema.ResourceData, m int
 
 	_, err := client.UpdateConnection(name, *body, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "UpdateConnection", "connection", "name=%s, id=%s", *body.Name, name))
 	}
 
 	return resourceConnectionRead(ctx, d, m)
@@ -291,11 +291,12 @@ func resourceConnectionUpdate(ctx context.Context, d *schema.ResourceData, m int
 func resourceConnectionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
-	connectionName := d.Id()
+	connectionID := d.Id()
+	name := d.Get("name").(string)
 
-	_, err := client.DeleteConnection(connectionName, nil)
+	_, err := client.DeleteConnection(connectionID, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "DeleteConnection", "connection", "name=%s, id=%s", name, connectionID))
 	}
 
 	return nil

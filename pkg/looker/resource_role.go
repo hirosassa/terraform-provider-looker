@@ -50,7 +50,7 @@ func resourceRoleCreate(ctx context.Context, d *schema.ResourceData, m interface
 
 	role, err := client.CreateRole(writeRole, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "CreateRole", "role", "%s", roleName))
 	}
 
 	roleID := *role.Id
@@ -66,7 +66,7 @@ func resourceRoleRead(ctx context.Context, d *schema.ResourceData, m interface{}
 
 	role, err := client.Role(roleID, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "Role", "role", "%s", roleID))
 	}
 
 	if err = d.Set("name", role.Name); err != nil {
@@ -99,7 +99,7 @@ func resourceRoleUpdate(ctx context.Context, d *schema.ResourceData, m interface
 	}
 	_, err := client.UpdateRole(roleID, writeRole, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "UpdateRole", "role", "name=%s, id=%s", roleName, roleID))
 	}
 
 	return resourceRoleRead(ctx, d, m)
@@ -109,10 +109,11 @@ func resourceRoleDelete(ctx context.Context, d *schema.ResourceData, m interface
 	client := m.(*apiclient.LookerSDK)
 
 	roleID := d.Id()
+	roleName := d.Get("name").(string)
 
 	_, err := client.DeleteRole(roleID, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "DeleteRole", "role", "name=%s, id=%s", roleName, roleID))
 	}
 
 	return nil

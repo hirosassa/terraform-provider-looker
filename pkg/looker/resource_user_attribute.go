@@ -87,7 +87,7 @@ func resourceUserAttributeCreate(ctx context.Context, d *schema.ResourceData, m 
 
 	userAttribute, err := client.CreateUserAttribute(writeUserAttribute, "", nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "CreateUserAttribute", "user_attribute", "%s", userAttributeName))
 	}
 
 	userAttributeID := *userAttribute.Id
@@ -103,7 +103,7 @@ func resourceUserAttributeRead(ctx context.Context, d *schema.ResourceData, m in
 
 	userAttribute, err := client.UserAttribute(userAttributeID, "", nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "UserAttribute", "user_attribute", "%s", userAttributeID))
 	}
 
 	if err = d.Set("name", userAttribute.Name); err != nil {
@@ -166,7 +166,7 @@ func resourceUserAttributeUpdate(ctx context.Context, d *schema.ResourceData, m 
 
 	_, err := client.UpdateUserAttribute(userAttributeID, writeUserAttribute, "", nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "UpdateUserAttribute", "user_attribute", "name=%s, id=%s", userAttributeName, userAttributeID))
 	}
 
 	return resourceUserAttributeRead(ctx, d, m)
@@ -176,12 +176,13 @@ func resourceUserAttributeDelete(ctx context.Context, d *schema.ResourceData, m 
 	client := m.(*apiclient.LookerSDK)
 
 	userAttributeID := d.Id()
+	userAttributeName := d.Get("name").(string)
 
 	log.Printf("[DEBUG] Delete user attribute %s", userAttributeID)
 
 	_, err := client.DeleteUserAttribute(userAttributeID, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "DeleteUserAttribute", "user_attribute", "name=%s, id=%s", userAttributeName, userAttributeID))
 	}
 
 	return nil

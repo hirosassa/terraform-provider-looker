@@ -74,7 +74,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface
 		return nil
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "CreateUser", "user", "%s", email))
 	}
 
 	userID := *user.Id
@@ -87,9 +87,9 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface
 	_, err = client.CreateUserCredentialsEmail(userID, writeCredentialsEmail, "", nil)
 	if err != nil {
 		if _, err = client.DeleteUser(userID, nil); err != nil {
-			return diag.FromErr(err)
+			return diag.FromErr(wrapSDKError(err, "DeleteUser", "user", "email=%s, id=%s", email, userID))
 		}
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "CreateUserCredentialsEmail", "user", "%s", email))
 	}
 
 	// Send setup mail if requested
@@ -99,7 +99,8 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface
 		if err != nil {
 			// Log the error but don't fail the resource creation
 			// since the user was successfully created
-			return diag.Errorf("User created successfully but failed to send setup email: %v", err)
+			return diag.Errorf("User created successfully but failed to send setup email: %v",
+				wrapSDKError(err, "SendUserCredentialsEmailPasswordReset", "user", "%s", email))
 		}
 	}
 
@@ -113,7 +114,7 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}
 
 	user, err := client.User(userID, "", nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "User", "user", "%s", userID))
 	}
 
 	if err = d.Set("email", user.Email); err != nil {
@@ -141,6 +142,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface
 		firstName := d.Get("first_name").(string)
 		lastName := d.Get("last_name").(string)
 		isDisabled := d.Get("is_disabled").(bool)
+		email := d.Get("email").(string)
 		writeUser := apiclient.WriteUser{
 			FirstName:  &firstName,
 			LastName:   &lastName,
@@ -148,7 +150,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface
 		}
 		_, err := client.UpdateUser(userID, writeUser, "", nil)
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.FromErr(wrapSDKError(err, "UpdateUser", "user", "email=%s, id=%s", email, userID))
 		}
 	}
 
@@ -159,7 +161,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface
 		}
 		_, err := client.UpdateUserCredentialsEmail(userID, writeCredentialsEmail, "", nil)
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.FromErr(wrapSDKError(err, "UpdateUserCredentialsEmail", "user", "email=%s, id=%s", email, userID))
 		}
 	}
 
@@ -170,10 +172,11 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, m interface
 	client := m.(*apiclient.LookerSDK)
 
 	userID := d.Id()
+	email := d.Get("email").(string)
 
 	_, err := client.DeleteUser(userID, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "DeleteUser", "user", "email=%s, id=%s", email, userID))
 	}
 
 	return nil

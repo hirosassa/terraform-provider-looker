@@ -45,7 +45,7 @@ func resourceRoleGroupsCreate(ctx context.Context, d *schema.ResourceData, m int
 
 	_, err := client.SetRoleGroups(roleID, groupIDs, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "SetRoleGroups", "role_groups", "%s", roleID))
 	}
 
 	d.SetId(roleID)
@@ -60,7 +60,7 @@ func resourceRoleGroupsRead(ctx context.Context, d *schema.ResourceData, m inter
 
 	groups, err := client.RoleGroups(roleID, "", nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "RoleGroups", "role_groups", "%s", roleID))
 	}
 
 	var groupIDs []string
@@ -93,7 +93,7 @@ func resourceRoleGroupsUpdate(ctx context.Context, d *schema.ResourceData, m int
 
 	_, err := client.SetRoleGroups(roleID, groupIDs, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "SetRoleGroups", "role_groups", "%s", roleID))
 	}
 
 	return resourceRoleGroupsRead(ctx, d, m)
@@ -107,7 +107,7 @@ func resourceRoleGroupsDelete(ctx context.Context, d *schema.ResourceData, m int
 	groupIDs := []string{}
 	_, err := client.SetRoleGroups(roleID, groupIDs, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "SetRoleGroups", "role_groups", "%s", roleID))
 	}
 
 	return nil

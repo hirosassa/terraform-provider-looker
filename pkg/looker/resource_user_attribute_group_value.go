@@ -52,7 +52,7 @@ func resourceUserAttributeGroupValueCreate(ctx context.Context, d *schema.Resour
 	}
 	userAttributeGroupValue, err := client.UpdateUserAttributeGroupValue(groupID, userAttributeID, body, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "UpdateUserAttributeGroupValue", "user_attribute_group_value", "%s:%s", groupID, userAttributeID))
 	}
 
 	groupIDString := *userAttributeGroupValue.GroupId
@@ -76,7 +76,7 @@ func resourceUserAttributeGroupValueRead(ctx context.Context, d *schema.Resource
 
 	userAttributeGroupValues, err := client.AllUserAttributeGroupValues(userAttributeID, "", nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "AllUserAttributeGroupValues", "user_attribute_group_value", "%s", userAttributeID))
 	}
 
 	var userAttributeGroupValue apiclient.UserAttributeGroupValue
@@ -119,7 +119,7 @@ func resourceUserAttributeGroupValueUpdate(ctx context.Context, d *schema.Resour
 	}
 	_, err = client.UpdateUserAttributeGroupValue(groupID, userAttributeID, body, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "UpdateUserAttributeGroupValue", "user_attribute_group_value", "%s:%s", groupID, userAttributeID))
 	}
 
 	return resourceUserAttributeGroupValueRead(ctx, d, m)
@@ -138,7 +138,7 @@ func resourceUserAttributeGroupValueDelete(ctx context.Context, d *schema.Resour
 	err = client.DeleteUserAttributeGroupValue(groupID, userAttributeID, nil)
 	if err != nil {
 		log.Printf("[DEBUG] %+v", err)
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "DeleteUserAttributeGroupValue", "user_attribute_group_value", "%s:%s", groupID, userAttributeID))
 	}
 
 	return nil

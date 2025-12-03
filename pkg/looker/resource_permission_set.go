@@ -49,7 +49,7 @@ func resourcePermissionSetCreate(ctx context.Context, d *schema.ResourceData, m 
 
 	permissionSet, err := client.CreatePermissionSet(writePermissionSet, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "CreatePermissionSet", "permission_set", "%s", permissionSetName))
 	}
 
 	permissionSetID := *permissionSet.Id
@@ -65,7 +65,7 @@ func resourcePermissionSetRead(ctx context.Context, d *schema.ResourceData, m in
 
 	permissionSet, err := client.PermissionSet(permissionSetID, "", nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "PermissionSet", "permission_set", "%s", permissionSetID))
 	}
 
 	if err = d.Set("name", permissionSet.Name); err != nil {
@@ -93,7 +93,7 @@ func resourcePermissionSetUpdate(ctx context.Context, d *schema.ResourceData, m 
 	}
 	_, err := client.UpdatePermissionSet(permissionSetID, writePermissionSet, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "UpdatePermissionSet", "permission_set", "name=%s, id=%s", permissionSetName, permissionSetID))
 	}
 
 	return resourcePermissionSetRead(ctx, d, m)
@@ -103,10 +103,11 @@ func resourcePermissionSetDelete(ctx context.Context, d *schema.ResourceData, m 
 	client := m.(*apiclient.LookerSDK)
 
 	permissionSetID := d.Id()
+	permissionSetName := d.Get("name").(string)
 
 	_, err := client.DeletePermissionSet(permissionSetID, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "DeletePermissionSet", "permission_set", "name=%s, id=%s", permissionSetName, permissionSetID))
 	}
 
 	return nil

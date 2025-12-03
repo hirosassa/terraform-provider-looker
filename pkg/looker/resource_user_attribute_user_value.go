@@ -49,7 +49,7 @@ func resourceUserAttributeUserValueCreate(ctx context.Context, d *schema.Resourc
 
 	userAttributeWithValue, err := client.SetUserAttributeUserValue(userID, userAttributeID, body, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "SetUserAttributeUserValue", "user_attribute_user_value", "%s:%s", userID, userAttributeID))
 	}
 
 	userIDString := *userAttributeWithValue.UserId
@@ -77,7 +77,7 @@ func resourceUserAttributeUserValueRead(ctx context.Context, d *schema.ResourceD
 
 	userAttributeUserValues, err := client.UserAttributeUserValues(request, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "UserAttributeUserValues", "user_attribute_user_value", "%s:%s", userID, userAttributeID))
 	}
 	if len(userAttributeUserValues) != 1 { // the number of the result should be one
 		return diag.FromErr(err)
@@ -111,7 +111,7 @@ func resourceUserAttributeUserValueUpdate(ctx context.Context, d *schema.Resourc
 
 	_, err = client.SetUserAttributeUserValue(userID, userAttributeID, body, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "SetUserAttributeUserValue", "user_attribute_user_value", "%s:%s", userID, userAttributeID))
 	}
 
 	return resourceUserAttributeUserValueRead(ctx, d, m)
@@ -130,7 +130,7 @@ func resourceUserAttributeUserValueDelete(ctx context.Context, d *schema.Resourc
 	err = client.DeleteUserAttributeUserValue(userID, userAttributeID, nil)
 	if err != nil {
 		log.Printf("[DEBUG] %+v", err)
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "DeleteUserAttributeUserValue", "user_attribute_user_value", "%s:%s", userID, userAttributeID))
 	}
 
 	return nil
