@@ -43,7 +43,7 @@ func resourceLookMLModelCreate(ctx context.Context, d *schema.ResourceData, m in
 
 	result, err := client.CreateLookmlModel(*body, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "CreateLookmlModel", "lookml_model", "%s", *body.Name))
 	}
 
 	d.SetId(*result.Name)
@@ -60,7 +60,7 @@ func resourceLookMLModelRead(ctx context.Context, d *schema.ResourceData, m inte
 			d.SetId("")
 			return nil
 		}
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "LookmlModel", "lookml_model", "%s", d.Id()))
 	}
 
 	return diag.FromErr(flattenLookMLModel(model, d))
@@ -73,7 +73,7 @@ func resourceLookMLModelUpdate(ctx context.Context, d *schema.ResourceData, m in
 
 	_, err := client.UpdateLookmlModel(d.Id(), *body, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "UpdateLookmlModel", "lookml_model", "name=%s, id=%s", *body.Name, d.Id()))
 	}
 
 	return resourceLookMLModelRead(ctx, d, m)
@@ -82,9 +82,11 @@ func resourceLookMLModelUpdate(ctx context.Context, d *schema.ResourceData, m in
 func resourceLookMLModelDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*apiclient.LookerSDK)
 
+	modelName := d.Get("name").(string)
+
 	_, err := client.DeleteLookmlModel(d.Id(), nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "DeleteLookmlModel", "lookml_model", "name=%s, id=%s", modelName, d.Id()))
 	}
 
 	return nil

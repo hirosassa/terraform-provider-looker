@@ -37,7 +37,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, m interfac
 
 	group, err := client.CreateGroup(writeGroup, "", nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "CreateGroup", "group", "%s", groupName))
 	}
 
 	groupID := *group.Id
@@ -53,7 +53,7 @@ func resourceGroupRead(ctx context.Context, d *schema.ResourceData, m interface{
 
 	group, err := client.Group(groupID, "", nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "Group", "group", "%s", groupID))
 	}
 
 	if err = d.Set("name", group.Name); err != nil {
@@ -74,7 +74,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 	}
 	_, err := client.UpdateGroup(groupID, writeGroup, "", nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "UpdateGroup", "group", "name=%s, id=%s", groupName, groupID))
 	}
 
 	return resourceGroupRead(ctx, d, m)
@@ -84,10 +84,11 @@ func resourceGroupDelete(ctx context.Context, d *schema.ResourceData, m interfac
 	client := m.(*apiclient.LookerSDK)
 
 	groupID := d.Id()
+	groupName := d.Get("name").(string)
 
 	_, err := client.DeleteGroup(groupID, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "DeleteGroup", "group", "name=%s, id=%s", groupName, groupID))
 	}
 
 	return nil

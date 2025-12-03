@@ -45,7 +45,7 @@ func resourceUserRolesCreate(ctx context.Context, d *schema.ResourceData, m inte
 
 	_, err := client.SetUserRoles(userID, roleIDs, "", nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "SetUserRoles", "user_roles", "%s", userID))
 	}
 
 	d.SetId(userID)
@@ -62,7 +62,7 @@ func resourceUserRolesRead(ctx context.Context, d *schema.ResourceData, m interf
 
 	userRoles, err := client.UserRoles(request, nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "UserRoles", "user_roles", "%s", userID))
 	}
 
 	var roleIDs []string
@@ -95,7 +95,7 @@ func resourceUserRolesUpdate(ctx context.Context, d *schema.ResourceData, m inte
 
 	_, err := client.SetUserRoles(userID, roleIDs, "", nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "SetUserRoles", "user_roles", "%s", userID))
 	}
 
 	return resourceUserRolesRead(ctx, d, m)
@@ -109,7 +109,7 @@ func resourceUserRolesDelete(ctx context.Context, d *schema.ResourceData, m inte
 	roleIDs := []string{}
 	_, err := client.SetUserRoles(userID, roleIDs, "", nil)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(wrapSDKError(err, "SetUserRoles", "user_roles", "%s", userID))
 	}
 
 	return nil
