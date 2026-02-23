@@ -20,7 +20,7 @@ func buildTwoPartID(a, b *string) string {
 func parseTwoPartID(id string) (string, string, error) {
 	parts := strings.SplitN(id, ":", 2)
 	if len(parts) != 2 {
-		return "", "", fmt.Errorf("Unexpected ID format (%q). Expected project:key", id)
+		return "", "", fmt.Errorf("unexpected ID format (%q). Expected project:key", id)
 	}
 
 	return parts[0], parts[1], nil
