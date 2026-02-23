@@ -12,6 +12,10 @@ import (
 // NOTE: This uses an alpha API endpoint and may be subject to breaking changes.
 func resourceServiceAccount() *schema.Resource {
 	return &schema.Resource{
+		Description: "Manages a Looker API-only service account.\n\n" +
+			"~> **Alpha:** This resource uses an alpha Looker API endpoint (`/users/service_accounts`) " +
+			"that is subject to breaking changes without prior notice.\n\n" +
+			"For more details, see [Looker documentation: Service accounts](https://docs.cloud.google.com/looker/docs/admin-panel-users-users#service-account).",
 		CreateContext: resourceServiceAccountCreate,
 		ReadContext:   resourceServiceAccountRead,
 		UpdateContext: resourceServiceAccountUpdate,
@@ -21,13 +25,15 @@ func resourceServiceAccount() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"service_account_name": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Display name of the service account.",
 			},
 			"is_disabled": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "When `true`, the service account is disabled and cannot authenticate.",
 			},
 		},
 	}

@@ -3,12 +3,18 @@
 page_title: "looker_service_account Resource - terraform-provider-looker"
 subcategory: ""
 description: |-
-  
+  Manages a Looker API-only service account.
+  ~> Alpha: This resource uses an alpha Looker API endpoint (/users/service_accounts) that is subject to breaking changes without prior notice.
+  For more details, see Looker documentation: Service accounts https://docs.cloud.google.com/looker/docs/admin-panel-users-users#service-account.
 ---
 
 # looker_service_account (Resource)
 
+Manages a Looker API-only service account.
 
+~> **Alpha:** This resource uses an alpha Looker API endpoint (`/users/service_accounts`) that is subject to breaking changes without prior notice.
+
+For more details, see [Looker documentation: Service accounts](https://docs.cloud.google.com/looker/docs/admin-panel-users-users#service-account).
 
 
 
@@ -17,11 +23,11 @@ description: |-
 
 ### Required
 
-- `service_account_name` (String)
+- `service_account_name` (String) Display name of the service account.
 
 ### Optional
 
-- `is_disabled` (Boolean)
+- `is_disabled` (Boolean) When `true`, the service account is disabled and cannot authenticate.
 
 ### Read-Only
 
