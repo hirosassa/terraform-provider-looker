@@ -1,8 +1,10 @@
 package looker
 
 import (
+	"sort"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -81,6 +83,113 @@ func TestParseTwoPartID(t *testing.T) {
 				a.Equal(tt.wantRes1, actualRes1)
 				a.Equal(tt.wantRes2, actualRes2)
 			}
+		})
+	}
+}
+
+func TestHash(t *testing.T) {
+	tests := map[string]struct {
+		input   interface{}
+		wantRes string
+	}{
+		"normal string": {
+			input:   "hello",
+			wantRes: "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
+		},
+		"empty string": {
+			input:   "",
+			wantRes: "",
+		},
+		"nil": {
+			input:   nil,
+			wantRes: "",
+		},
+	}
+
+	for key, tt := range tests {
+		t.Run(key, func(t *testing.T) {
+			actual := hash(tt.input)
+			assert.Equal(t, tt.wantRes, actual)
+		})
+	}
+}
+
+func TestExpandStringListFromSet(t *testing.T) {
+	tests := map[string]struct {
+		input    []interface{}
+		wantList []string
+	}{
+		"normal strings": {
+			input:    []interface{}{"c", "a", "b"},
+			wantList: []string{"a", "b", "c"},
+		},
+		"empty set": {
+			input:    []interface{}{},
+			wantList: nil,
+		},
+	}
+
+	for key, tt := range tests {
+		t.Run(key, func(t *testing.T) {
+			set := schema.NewSet(schema.HashString, tt.input)
+			actual := expandStringListFromSet(set)
+			sort.Strings(actual)
+			assert.Equal(t, tt.wantList, actual)
+		})
+	}
+}
+
+func TestFlattenStringListToSet(t *testing.T) {
+	tests := map[string]struct {
+		input    []string
+		wantList []string
+	}{
+		"normal strings": {
+			input:    []string{"c", "a", "b"},
+			wantList: []string{"a", "b", "c"},
+		},
+		"empty slice": {
+			input:    []string{},
+			wantList: []string{},
+		},
+	}
+
+	for key, tt := range tests {
+		t.Run(key, func(t *testing.T) {
+			result := flattenStringListToSet(tt.input)
+			actual := make([]string, 0, result.Len())
+			for _, v := range result.List() {
+				actual = append(actual, v.(string))
+			}
+			sort.Strings(actual)
+			assert.Equal(t, tt.wantList, actual)
+		})
+	}
+}
+
+func TestFlattenStringList(t *testing.T) {
+	tests := map[string]struct {
+		input   []string
+		wantRes []interface{}
+	}{
+		"normal strings": {
+			input:   []string{"a", "b", "c"},
+			wantRes: []interface{}{"a", "b", "c"},
+		},
+		"empty slice": {
+			input:   []string{},
+			wantRes: []interface{}{},
+		},
+		"nil slice": {
+			input:   nil,
+			wantRes: []interface{}{},
+		},
+	}
+
+	for key, tt := range tests {
+		t.Run(key, func(t *testing.T) {
+			actual := flattenStringList(tt.input)
+			assert.Equal(t, tt.wantRes, actual)
 		})
 	}
 }
