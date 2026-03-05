@@ -38,7 +38,7 @@ func testAccCheckUserRoleDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*apiclient.LookerSDK)
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "looker_user_role" {
+		if rs.Type != "looker_user_roles" {
 			continue
 		}
 

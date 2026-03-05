@@ -103,12 +103,10 @@ func testAccCheckUserAttributeUserValueDestroy(s *terraform.State) error {
 			return err
 		}
 
-		if len(userAttributeUserValues) != 1 {
-			return err
-		}
-
-		if userAttributeUserValues[0].Value != nil {
-			return err
+		for _, v := range userAttributeUserValues {
+			if v.Value != nil {
+				return fmt.Errorf("looker_user_attribute_user_value '%s' still has a value set", rs.Primary.ID)
+			}
 		}
 	}
 

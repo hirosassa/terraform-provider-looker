@@ -8,7 +8,7 @@ import (
 
 func TestAccDataSourceUsers(t *testing.T) {
 	dataSourceName := "data.looker_users.test"
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
