@@ -74,6 +74,8 @@ func testAccCheckConnectionDestroy(s *terraform.State) error {
 			}
 			return err
 		}
+
+		return fmt.Errorf("connection '%s' still exists", connectionName)
 	}
 
 	return nil

@@ -16,7 +16,7 @@ func TestAcc_LookMLModel(t *testing.T) {
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: providers(),
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: lookMLModelConfig(name, connectionName, projectName),

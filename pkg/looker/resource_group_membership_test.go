@@ -108,7 +108,7 @@ func testAccCheckGroupMembershipDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*apiclient.LookerSDK)
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "looker_membership" {
+		if rs.Type != "looker_group_membership" {
 			continue
 		}
 
