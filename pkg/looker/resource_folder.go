@@ -2,6 +2,7 @@ package looker
 
 import (
 	"context"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -64,6 +65,10 @@ func resourceFolderRead(ctx context.Context, d *schema.ResourceData, m interface
 
 	folder, err := client.Folder(folderID, "", nil)
 	if err != nil {
+		if strings.Contains(err.Error(), "404") {
+			d.SetId("")
+			return nil
+		}
 		return diag.FromErr(wrapSDKError(err, "Folder", "folder", "%s", folderID))
 	}
 
@@ -100,8 +105,10 @@ func resourceFolderUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	if d.HasChange("parent_id") {
-		parentID := d.Get("parent_id").(string)
-		updateFolder.ParentId = &parentID
+		if v, ok := d.GetOk("parent_id"); ok {
+			parentID := v.(string)
+			updateFolder.ParentId = &parentID
+		}
 		hasChanges = true
 	}
 
