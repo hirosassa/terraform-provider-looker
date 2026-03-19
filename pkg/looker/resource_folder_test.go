@@ -76,3 +76,29 @@ func folderConfig(name, parentID string) string {
 	}
 	`, name, parentID)
 }
+
+func folderConfigWithoutParentID(name string) string {
+	return fmt.Sprintf(`
+	resource "looker_folder" "test_no_parent" {
+		name = "%s"
+	}
+	`, name)
+}
+
+func TestAcc_FolderWithoutParentID(t *testing.T) {
+	name := strings.ToUpper(acctest.RandStringFromCharSet(10, acctest.CharSetAlpha))
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: folderConfigWithoutParentID(name),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("looker_folder.test_no_parent", "name", name),
+				),
+			},
+		},
+		CheckDestroy: testAccCheckFolderDestroy,
+	})
+}

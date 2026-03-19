@@ -80,11 +80,6 @@ func resourceFolderRead(ctx context.Context, d *schema.ResourceData, m interface
 		if err = d.Set("parent_id", *folder.ParentId); err != nil {
 			return diag.FromErr(err)
 		}
-	} else {
-		// Root folder has no parent_id
-		if err = d.Set("parent_id", ""); err != nil {
-			return diag.FromErr(err)
-		}
 	}
 
 	return nil
@@ -108,8 +103,8 @@ func resourceFolderUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 		if v, ok := d.GetOk("parent_id"); ok {
 			parentID := v.(string)
 			updateFolder.ParentId = &parentID
+			hasChanges = true
 		}
-		hasChanges = true
 	}
 
 	if hasChanges {
