@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	apiclient "github.com/looker-open-source/sdk-codegen/go/sdk/v4"
 )
 
@@ -25,8 +26,9 @@ func resourceFolder() *schema.Resource {
 				Required: true,
 			},
 			"parent_id": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringIsNotEmpty,
 			},
 		},
 	}
@@ -73,10 +75,12 @@ func resourceFolderRead(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 
+	parentID := ""
 	if folder.ParentId != nil {
-		if err = d.Set("parent_id", *folder.ParentId); err != nil {
-			return diag.FromErr(err)
-		}
+		parentID = *folder.ParentId
+	}
+	if err = d.Set("parent_id", parentID); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil

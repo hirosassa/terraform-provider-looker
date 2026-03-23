@@ -86,6 +86,21 @@ func folderConfigWithoutParentID(name string) string {
 	`, name)
 }
 
+func TestAcc_FolderWithEmptyParentID(t *testing.T) {
+	name := strings.ToUpper(acctest.RandStringFromCharSet(10, acctest.CharSetAlpha))
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config:      folderConfig(name, ""),
+				ExpectError: regexp.MustCompile(`expected "parent_id" to not be an empty string`),
+			},
+		},
+	})
+}
+
 func TestAcc_FolderWithoutParentID(t *testing.T) {
 	name := strings.ToUpper(acctest.RandStringFromCharSet(10, acctest.CharSetAlpha))
 
