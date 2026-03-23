@@ -2,6 +2,7 @@ package looker
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -85,6 +86,21 @@ func folderConfigWithoutParentID(name string) string {
 	`, name)
 }
 
+func TestAcc_FolderWithEmptyParentID(t *testing.T) {
+	name := strings.ToUpper(acctest.RandStringFromCharSet(10, acctest.CharSetAlpha))
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config:      folderConfig(name, ""),
+				ExpectError: regexp.MustCompile(`expected "parent_id" to not be an empty string`),
+			},
+		},
+	})
+}
+
 func TestAcc_FolderWithoutParentID(t *testing.T) {
 	name := strings.ToUpper(acctest.RandStringFromCharSet(10, acctest.CharSetAlpha))
 
@@ -93,12 +109,9 @@ func TestAcc_FolderWithoutParentID(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: folderConfigWithoutParentID(name),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("looker_folder.test_no_parent", "name", name),
-				),
+				Config:      folderConfigWithoutParentID(name),
+				ExpectError: regexp.MustCompile(`The argument "parent_id" is required`),
 			},
 		},
-		CheckDestroy: testAccCheckFolderDestroy,
 	})
 }

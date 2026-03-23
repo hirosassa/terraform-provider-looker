@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	apiclient "github.com/looker-open-source/sdk-codegen/go/sdk/v4"
 )
 
@@ -25,8 +26,9 @@ func resourceFolder() *schema.Resource {
 				Required: true,
 			},
 			"parent_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringIsNotEmpty,
 			},
 		},
 	}
@@ -37,11 +39,8 @@ func resourceFolderCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	folderName := d.Get("name").(string)
 
 	writeFolder := apiclient.CreateFolder{
-		Name: folderName,
-	}
-
-	if v, ok := d.GetOk("parent_id"); ok {
-		writeFolder.ParentId = v.(string)
+		Name:     folderName,
+		ParentId: d.Get("parent_id").(string),
 	}
 
 	folder, err := client.CreateFolder(writeFolder, nil)
@@ -76,10 +75,11 @@ func resourceFolderRead(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 
-	if folder.ParentId != nil {
-		if err = d.Set("parent_id", *folder.ParentId); err != nil {
-			return diag.FromErr(err)
-		}
+	if folder.ParentId == nil {
+		return diag.Errorf("folder %s has no parent_id; root-level folders are not supported", folderID)
+	}
+	if err = d.Set("parent_id", *folder.ParentId); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -100,11 +100,9 @@ func resourceFolderUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	if d.HasChange("parent_id") {
-		if v, ok := d.GetOk("parent_id"); ok {
-			parentID := v.(string)
-			updateFolder.ParentId = &parentID
-			hasChanges = true
-		}
+		parentID := d.Get("parent_id").(string)
+		updateFolder.ParentId = &parentID
+		hasChanges = true
 	}
 
 	if hasChanges {
