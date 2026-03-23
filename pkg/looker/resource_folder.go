@@ -26,7 +26,7 @@ func resourceFolder() *schema.Resource {
 			},
 			"parent_id": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 		},
 	}
@@ -37,11 +37,8 @@ func resourceFolderCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	folderName := d.Get("name").(string)
 
 	writeFolder := apiclient.CreateFolder{
-		Name: folderName,
-	}
-
-	if v, ok := d.GetOk("parent_id"); ok {
-		writeFolder.ParentId = v.(string)
+		Name:     folderName,
+		ParentId: d.Get("parent_id").(string),
 	}
 
 	folder, err := client.CreateFolder(writeFolder, nil)
@@ -100,11 +97,9 @@ func resourceFolderUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	if d.HasChange("parent_id") {
-		if v, ok := d.GetOk("parent_id"); ok {
-			parentID := v.(string)
-			updateFolder.ParentId = &parentID
-			hasChanges = true
-		}
+		parentID := d.Get("parent_id").(string)
+		updateFolder.ParentId = &parentID
+		hasChanges = true
 	}
 
 	if hasChanges {

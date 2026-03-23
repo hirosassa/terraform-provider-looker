@@ -25,9 +25,6 @@ resource "looker_folder" "my_folder" {
 ### Required
 
 - `name` (String)
-
-### Optional
-
 - `parent_id` (String)
 
 ### Read-Only

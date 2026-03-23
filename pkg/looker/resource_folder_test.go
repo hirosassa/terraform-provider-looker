@@ -2,6 +2,7 @@ package looker
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -93,12 +94,9 @@ func TestAcc_FolderWithoutParentID(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: folderConfigWithoutParentID(name),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("looker_folder.test_no_parent", "name", name),
-				),
+				Config:      folderConfigWithoutParentID(name),
+				ExpectError: regexp.MustCompile(`The argument "parent_id" is required`),
 			},
 		},
-		CheckDestroy: testAccCheckFolderDestroy,
 	})
 }
