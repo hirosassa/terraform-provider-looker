@@ -75,11 +75,10 @@ func resourceFolderRead(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 
-	parentID := ""
-	if folder.ParentId != nil {
-		parentID = *folder.ParentId
+	if folder.ParentId == nil {
+		return diag.Errorf("folder %s has no parent_id; root-level folders are not supported", folderID)
 	}
-	if err = d.Set("parent_id", parentID); err != nil {
+	if err = d.Set("parent_id", *folder.ParentId); err != nil {
 		return diag.FromErr(err)
 	}
 
