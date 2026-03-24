@@ -30,6 +30,16 @@ func resourceFolder() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.StringIsNotEmpty,
 			},
+			"content_metadata_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"inherits": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				Description: "Whether content inherits its access levels from parent. Set to false to manage access with looker_content_metadata_access.",
+			},
 		},
 	}
 }
@@ -53,6 +63,19 @@ func resourceFolderCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	d.SetId(*folder.Id)
+	if folder.ContentMetadataId != nil {
+		if err = d.Set("content_metadata_id", *folder.ContentMetadataId); err != nil {
+			return diag.FromErr(err)
+		}
+
+		inherits := d.Get("inherits").(bool)
+		_, err = client.UpdateContentMetadata(*folder.ContentMetadataId, apiclient.WriteContentMeta{
+			Inherits: &inherits,
+		}, nil)
+		if err != nil {
+			return diag.FromErr(wrapSDKError(err, "UpdateContentMetadata", "folder", "content_metadata_id=%s", *folder.ContentMetadataId))
+		}
+	}
 
 	return resourceFolderRead(ctx, d, m)
 }
@@ -80,6 +103,22 @@ func resourceFolderRead(ctx context.Context, d *schema.ResourceData, m interface
 	}
 	if err = d.Set("parent_id", *folder.ParentId); err != nil {
 		return diag.FromErr(err)
+	}
+
+	if folder.ContentMetadataId != nil {
+		if err = d.Set("content_metadata_id", *folder.ContentMetadataId); err != nil {
+			return diag.FromErr(err)
+		}
+
+		contentMeta, err := client.ContentMetadata(*folder.ContentMetadataId, "", nil)
+		if err != nil {
+			return diag.FromErr(wrapSDKError(err, "ContentMetadata", "folder", "content_metadata_id=%s", *folder.ContentMetadataId))
+		}
+		if contentMeta.Inherits != nil {
+			if err = d.Set("inherits", *contentMeta.Inherits); err != nil {
+				return diag.FromErr(err)
+			}
+		}
 	}
 
 	return nil
@@ -112,6 +151,19 @@ func resourceFolderUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 		}
 	}
 
+	if d.HasChange("inherits") {
+		contentMetadataID := d.Get("content_metadata_id").(string)
+		if contentMetadataID != "" {
+			inherits := d.Get("inherits").(bool)
+			_, err := client.UpdateContentMetadata(contentMetadataID, apiclient.WriteContentMeta{
+				Inherits: &inherits,
+			}, nil)
+			if err != nil {
+				return diag.FromErr(wrapSDKError(err, "UpdateContentMetadata", "folder", "content_metadata_id=%s", contentMetadataID))
+			}
+		}
+	}
+
 	return resourceFolderRead(ctx, d, m)
 }
 
@@ -123,6 +175,9 @@ func resourceFolderDelete(ctx context.Context, d *schema.ResourceData, m interfa
 
 	_, err := client.DeleteFolder(folderID, nil)
 	if err != nil {
+		if strings.Contains(err.Error(), "404") {
+			return nil
+		}
 		return diag.FromErr(wrapSDKError(err, "DeleteFolder", "folder", "name=%s, id=%s", folderName, folderID))
 	}
 
