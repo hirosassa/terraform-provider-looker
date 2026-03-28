@@ -27,6 +27,11 @@ resource "looker_folder" "my_folder" {
 - `name` (String)
 - `parent_id` (String)
 
+### Optional
+
+- `inherits` (Boolean) Whether content inherits its access levels from parent. Set to false to manage access with looker_content_metadata_access.
+
 ### Read-Only
 
+- `content_metadata_id` (String)
 - `id` (String) The ID of this resource.

@@ -66,6 +66,7 @@ func Provider() *schema.Provider {
 			"looker_lookml_model":               resourceLookMLModel(),
 			"looker_service_account":            resourceServiceAccount(),
 			"looker_folder":                     resourceFolder(),
+			"looker_content_metadata_access":    resourceContentMetadataAccess(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"looker_users": dataSourceUsers(),
