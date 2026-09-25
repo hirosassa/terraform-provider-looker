@@ -3,4 +3,5 @@ resource "looker_user" "user" {
   first_name                = "Reporting"
   last_name                 = "API User"
   send_setup_link_on_create = true
+  can_manage_api3_creds     = true
 }
