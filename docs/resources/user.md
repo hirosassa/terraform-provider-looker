@@ -18,6 +18,7 @@ resource "looker_user" "user" {
   first_name                = "Reporting"
   last_name                 = "API User"
   send_setup_link_on_create = true
+  can_manage_api3_creds     = true
 }
 ```
 
@@ -30,6 +31,7 @@ resource "looker_user" "user" {
 
 ### Optional
 
+- `can_manage_api3_creds` (Boolean) Whether the user can create, view, and delete API keys for their own account. When omitted, the current value on Looker is left unchanged. This field is marked as experimental in the Looker API and may not be available on your instance.
 - `first_name` (String)
 - `is_disabled` (Boolean)
 - `last_name` (String)

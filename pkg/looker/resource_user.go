@@ -42,6 +42,15 @@ func resourceUser() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"can_manage_api3_creds": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				// Computed so that users whose flag was turned on outside Terraform don't get a diff back to false when this is omitted.
+				Computed: true,
+				Description: "Whether the user can create, view, and delete API keys for their own account. " +
+					"When omitted, the current value on Looker is left unchanged. " +
+					"This field is marked as experimental in the Looker API and may not be available on your instance.",
+			},
 		},
 	}
 }
@@ -57,6 +66,11 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, m interface
 		FirstName:  &firstName,
 		LastName:   &lastName,
 		IsDisabled: &isDisabled,
+	}
+	// Why not d.Get: it can't distinguish "unset" from false, and we avoid sending this experimental field unless it is explicitly configured.
+	if raw := d.GetRawConfig().GetAttr("can_manage_api3_creds"); !raw.IsNull() {
+		canManageAPI3Creds := raw.True()
+		writeUser.CanManageApi3Creds = &canManageAPI3Creds
 	}
 
 	// CreateUser sometimes returns 500 error
@@ -129,6 +143,9 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}
 	if err = d.Set("is_disabled", user.IsDisabled); err != nil {
 		return diag.FromErr(err)
 	}
+	if err = d.Set("can_manage_api3_creds", user.CanManageApi3Creds); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -138,7 +155,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface
 
 	userID := d.Id()
 
-	if d.HasChanges("first_name", "last_name", "is_disabled") {
+	if d.HasChanges("first_name", "last_name", "is_disabled", "can_manage_api3_creds") {
 		firstName := d.Get("first_name").(string)
 		lastName := d.Get("last_name").(string)
 		isDisabled := d.Get("is_disabled").(bool)
@@ -147,6 +164,10 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface
 			FirstName:  &firstName,
 			LastName:   &lastName,
 			IsDisabled: &isDisabled,
+		}
+		if d.HasChange("can_manage_api3_creds") {
+			canManageAPI3Creds := d.Get("can_manage_api3_creds").(bool)
+			writeUser.CanManageApi3Creds = &canManageAPI3Creds
 		}
 		_, err := client.UpdateUser(userID, writeUser, "", nil)
 		if err != nil {

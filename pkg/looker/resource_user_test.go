@@ -103,3 +103,43 @@ func userConfigWithSetupMail(firstName, lastName, email string) string {
 	}
 	`, firstName, lastName, email)
 }
+
+func TestAcc_UserCanManageAPI3Creds(t *testing.T) {
+	name := strings.ToUpper(acctest.RandStringFromCharSet(10, acctest.CharSetAlpha))
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: userConfigWithCanManageAPI3Creds(name, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("looker_user.test", "can_manage_api3_creds", "true"),
+				),
+			},
+			{
+				Config: userConfigWithCanManageAPI3Creds(name, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("looker_user.test", "can_manage_api3_creds", "false"),
+				),
+			},
+			{
+				ResourceName:      "looker_user.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+		CheckDestroy: testAccCheckUserDestroy,
+	})
+}
+
+func userConfigWithCanManageAPI3Creds(name string, canManageAPI3Creds bool) string {
+	return fmt.Sprintf(`
+	resource "looker_user" "test" {
+		first_name = "%s"
+		last_name = "%s"
+		email = "%s@example.com"
+		can_manage_api3_creds = %t
+	}
+	`, name, name, name, canManageAPI3Creds)
+}
