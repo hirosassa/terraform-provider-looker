@@ -69,7 +69,12 @@ func Provider() *schema.Provider {
 			"looker_content_metadata_access":    resourceContentMetadataAccess(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"looker_users": dataSourceUsers(),
+			"looker_group":          dataSourceGroup(),
+			"looker_model_set":      dataSourceModelSet(),
+			"looker_permission_set": dataSourcePermissionSet(),
+			"looker_role":           dataSourceRole(),
+			"looker_user":           dataSourceUser(),
+			"looker_users":          dataSourceUsers(),
 		},
 
 		ConfigureContextFunc: providerConfigure,

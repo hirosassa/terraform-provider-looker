@@ -70,7 +70,7 @@ func roleGroupsConfig(name string) string {
 	}
 	resource "looker_permission_set" "test" {
 		name = "%s"
-		permissions = ["test"]
+		permissions = ["access_data"]
 	}
 	resource "looker_role" "test" {
 		name = "%s"

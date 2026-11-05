@@ -69,19 +69,17 @@ func resourceRoleRead(ctx context.Context, d *schema.ResourceData, m interface{}
 		return diag.FromErr(wrapSDKError(err, "Role", "role", "%s", roleID))
 	}
 
-	if err = d.Set("name", role.Name); err != nil {
-		return diag.FromErr(err)
-	}
-	pSetID := *role.PermissionSet.Id
-	if err = d.Set("permission_set_id", pSetID); err != nil {
-		return diag.FromErr(err)
-	}
-	mSetID := *role.ModelSet.Id
-	if err = d.Set("model_set_id", mSetID); err != nil {
-		return diag.FromErr(err)
-	}
+	return diag.FromErr(flattenRole(role, d))
+}
 
-	return nil
+func flattenRole(role apiclient.Role, d *schema.ResourceData) error {
+	if err := d.Set("name", role.Name); err != nil {
+		return err
+	}
+	if err := d.Set("permission_set_id", *role.PermissionSet.Id); err != nil {
+		return err
+	}
+	return d.Set("model_set_id", *role.ModelSet.Id)
 }
 
 func resourceRoleUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
