@@ -68,14 +68,14 @@ func resourceModelSetRead(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(wrapSDKError(err, "ModelSet", "model_set", "%s", modelSetID))
 	}
 
-	if err = d.Set("name", modelSet.Name); err != nil {
-		return diag.FromErr(err)
-	}
-	if err = d.Set("models", modelSet.Models); err != nil {
-		return diag.FromErr(err)
-	}
+	return diag.FromErr(flattenModelSet(modelSet, d))
+}
 
-	return nil
+func flattenModelSet(modelSet apiclient.ModelSet, d *schema.ResourceData) error {
+	if err := d.Set("name", modelSet.Name); err != nil {
+		return err
+	}
+	return d.Set("models", modelSet.Models)
 }
 
 func resourceModelSetUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

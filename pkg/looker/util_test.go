@@ -193,3 +193,50 @@ func TestFlattenStringList(t *testing.T) {
 		})
 	}
 }
+
+func TestFindExactMatch(t *testing.T) {
+	strp := func(s string) *string { return &s }
+	items := []*string{strp("axb"), nil, strp("A_B"), strp("other")}
+	getName := func(s *string) *string { return s }
+
+	tests := map[string]struct {
+		name    string
+		want    *string
+		wantHit bool
+	}{
+		"exact match":                     {name: "A_B", want: items[2], wantHit: true},
+		"case-insensitive match":          {name: "a_b", want: items[2], wantHit: true},
+		"wildcard chars are not wildcard": {name: "a_x", wantHit: false},
+		"not found":                       {name: "missing", wantHit: false},
+	}
+
+	for key, tt := range tests {
+		t.Run(key, func(t *testing.T) {
+			got, ok := findExactMatch(items, tt.name, getName)
+			assert.Equal(t, tt.wantHit, ok)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestDataSourceSchemaFromResourceSchema(t *testing.T) {
+	rs := map[string]*schema.Schema{
+		"name":  {Type: schema.TypeString, Required: true, ForceNew: true},
+		"flag":  {Type: schema.TypeBool, Optional: true, Default: false},
+		"items": {Type: schema.TypeSet, Required: true, Elem: &schema.Schema{Type: schema.TypeString}},
+	}
+
+	ds := dataSourceSchemaFromResourceSchema(rs, "name", "lookup key.")
+
+	assert.True(t, ds["name"].Required)
+	assert.False(t, ds["name"].Computed)
+	assert.Equal(t, "lookup key. Matched case-insensitively.", ds["name"].Description)
+	for _, k := range []string{"flag", "items"} {
+		assert.True(t, ds[k].Computed, k)
+		assert.False(t, ds[k].Optional, k)
+		assert.False(t, ds[k].Required, k)
+		assert.Nil(t, ds[k].Default, k)
+	}
+	assert.True(t, rs["name"].ForceNew)
+	assert.True(t, rs["items"].Required)
+}

@@ -56,11 +56,11 @@ func resourceGroupRead(ctx context.Context, d *schema.ResourceData, m interface{
 		return diag.FromErr(wrapSDKError(err, "Group", "group", "%s", groupID))
 	}
 
-	if err = d.Set("name", group.Name); err != nil {
-		return diag.FromErr(err)
-	}
+	return diag.FromErr(flattenGroup(group, d))
+}
 
-	return nil
+func flattenGroup(group apiclient.Group, d *schema.ResourceData) error {
+	return d.Set("name", group.Name)
 }
 
 func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

@@ -131,23 +131,23 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, m interface{}
 		return diag.FromErr(wrapSDKError(err, "User", "user", "%s", userID))
 	}
 
-	if err = d.Set("email", user.Email); err != nil {
-		return diag.FromErr(err)
-	}
-	if err = d.Set("first_name", user.FirstName); err != nil {
-		return diag.FromErr(err)
-	}
-	if err = d.Set("last_name", user.LastName); err != nil {
-		return diag.FromErr(err)
-	}
-	if err = d.Set("is_disabled", user.IsDisabled); err != nil {
-		return diag.FromErr(err)
-	}
-	if err = d.Set("can_manage_api3_creds", user.CanManageApi3Creds); err != nil {
-		return diag.FromErr(err)
-	}
+	return diag.FromErr(flattenUser(user, d))
+}
 
-	return nil
+func flattenUser(user apiclient.User, d *schema.ResourceData) error {
+	if err := d.Set("email", user.Email); err != nil {
+		return err
+	}
+	if err := d.Set("first_name", user.FirstName); err != nil {
+		return err
+	}
+	if err := d.Set("last_name", user.LastName); err != nil {
+		return err
+	}
+	if err := d.Set("is_disabled", user.IsDisabled); err != nil {
+		return err
+	}
+	return d.Set("can_manage_api3_creds", user.CanManageApi3Creds)
 }
 
 func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

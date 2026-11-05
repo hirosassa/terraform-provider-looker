@@ -68,13 +68,14 @@ func resourcePermissionSetRead(ctx context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(wrapSDKError(err, "PermissionSet", "permission_set", "%s", permissionSetID))
 	}
 
-	if err = d.Set("name", permissionSet.Name); err != nil {
-		return diag.FromErr(err)
+	return diag.FromErr(flattenPermissionSet(permissionSet, d))
+}
+
+func flattenPermissionSet(permissionSet apiclient.PermissionSet, d *schema.ResourceData) error {
+	if err := d.Set("name", permissionSet.Name); err != nil {
+		return err
 	}
-	if err = d.Set("permissions", permissionSet.Permissions); err != nil {
-		return diag.FromErr(err)
-	}
-	return nil
+	return d.Set("permissions", permissionSet.Permissions)
 }
 
 func resourcePermissionSetUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

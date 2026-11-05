@@ -72,7 +72,7 @@ func permissionSetConfig(name string) string {
 	return fmt.Sprintf(`
 	resource "looker_permission_set" "test" {
 		name = "%s"
-		permissions = ["test"]
+		permissions = ["access_data"]
 	}
 	`, name)
 }
