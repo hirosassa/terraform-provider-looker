@@ -62,9 +62,9 @@ func resourceConnection() *schema.Resource {
 			},
 			"file_type": {
 				Type:         schema.TypeString,
-				Description:  "Certificate key file type (.json or .p12).",
+				Description:  "Certificate key file type (.json, .p8 or .p12).",
 				Optional:     true,
-				ValidateFunc: validation.StringInSlice([]string{".json", ".p12"}, false),
+				ValidateFunc: validation.StringInSlice([]string{".json", ".p8", ".p12"}, false),
 			},
 			"database": {
 				Type:     schema.TypeString,
@@ -238,6 +238,15 @@ func resourceConnection() *schema.Resource {
 			"impersonated_service_account": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"uses_key_pair_auth": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				// Computed so that existing connections don't get a diff when this is omitted.
+				Computed: true,
+				Description: "Whether the connection authenticates with a key pair (Snowflake only). " +
+					"Set `certificate` to the base64 encoded PKCS#8 private key and `file_type` to `.p8`. " +
+					"For an encrypted private key, set `password` to its passphrase.",
 			},
 		},
 	}
@@ -450,6 +459,10 @@ func expandWriteDBConnection(d *schema.ResourceData) *apiclient.WriteDBConnectio
 			writeDBConnection.ImpersonatedServiceAccount = &impersonatedServiceAccount
 		}
 	}
+	if d.HasChange("uses_key_pair_auth") {
+		usesKeyPairAuth := d.Get("uses_key_pair_auth").(bool)
+		writeDBConnection.UsesKeyPairAuth = &usesKeyPairAuth
+	}
 
 	userAttributeFields := expandStringListFromSet(d.Get("user_attribute_fields").(*schema.Set))
 	writeDBConnection.UserAttributeFields = &userAttributeFields
@@ -628,6 +641,9 @@ func flattenConnection(connection apiclient.DBConnection, d *schema.ResourceData
 		return err
 	}
 	if err := d.Set("impersonated_service_account", connection.ImpersonatedServiceAccount); err != nil {
+		return err
+	}
+	if err := d.Set("uses_key_pair_auth", connection.UsesKeyPairAuth); err != nil {
 		return err
 	}
 	return nil
