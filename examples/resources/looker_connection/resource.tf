@@ -24,3 +24,19 @@ resource "looker_connection" "snowflake_connection" {
   jdbc_additional_params = "account=${var.snowflake_account}&warehouse=WHARE_HOUSE"
   dialect_name           = "snowflake"
 }
+
+resource "looker_connection" "snowflake_key_pair_connection" {
+  name                   = "snowflake_key_pair_connection"
+  host                   = var.snowflake_host
+  port                   = 443
+  username               = var.snowflake_username
+  certificate            = filebase64("path/to/rsa_key.p8")
+  file_type              = ".p8"
+  uses_key_pair_auth     = true
+  password               = var.snowflake_private_key_passphrase
+  database               = "DATABASE"
+  schema                 = "SAMPLE"
+  ssl                    = true
+  jdbc_additional_params = "warehouse=WAREHOUSE"
+  dialect_name           = "snowflake"
+}
